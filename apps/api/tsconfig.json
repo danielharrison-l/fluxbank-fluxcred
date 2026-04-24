@@ -10,6 +10,8 @@
     "resolvePackageJsonExports": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2023",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "sourceMap": true,
     "incremental": true,
     "baseUrl": ".",

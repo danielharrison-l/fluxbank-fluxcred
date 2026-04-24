@@ -1,0 +1,311 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  phone        String?
+  document     String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  pluggyItems       PluggyItem[]
+  consents          Consent[]
+  financialAccounts FinancialAccount[]
+  transactions      Transaction[]
+  financialMetrics  FinancialMetric[]
+  creditScores      CreditScore[]
+  creditRequests    CreditRequest[]
+
+  @@map("users")
+}
+
+model PluggyItem {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  userId               String                 @map("user_id") @db.Uuid
+  pluggyItemId         String                 @unique @map("pluggy_item_id")
+  connectorId          String?                @map("connector_id")
+  institutionName      String?                @map("institution_name")
+  status               PluggyItemStatus
+  statusDetail         String?                @map("status_detail")
+  executionStatus      PluggyExecutionStatus? @map("execution_status")
+  lastUpdatedAt        DateTime?              @map("last_updated_at")
+  lastSuccessfulSyncAt DateTime?              @map("last_successful_sync_at")
+  errorCode            String?                @map("error_code")
+  errorMessage         String?                @map("error_message")
+  createdAt            DateTime               @default(now()) @map("created_at")
+  updatedAt            DateTime               @updatedAt @map("updated_at")
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consents          Consent[]
+  financialAccounts FinancialAccount[]
+  syncLogs          SyncLog[]
+
+  @@index([userId])
+  @@map("pluggy_items")
+}
+
+model Consent {
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @map("user_id") @db.Uuid
+  pluggyItemId String        @map("pluggy_item_id") @db.Uuid
+  status       ConsentStatus
+  scopes       String[]
+  grantedAt    DateTime      @map("granted_at")
+  expiresAt    DateTime?     @map("expires_at")
+  revokedAt    DateTime?     @map("revoked_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pluggyItem PluggyItem @relation(fields: [pluggyItemId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([pluggyItemId])
+  @@index([status])
+  @@map("consents")
+}
+
+model FinancialAccount {
+  id                   String        @id @default(uuid()) @db.Uuid
+  userId               String        @map("user_id") @db.Uuid
+  pluggyItemId         String        @map("pluggy_item_id") @db.Uuid
+  pluggyAccountId      String        @unique @map("pluggy_account_id")
+  type                 AccountType
+  subtype              String?
+  numberMasked         String?       @map("number_masked")
+  name                 String?
+  marketingName        String?       @map("marketing_name")
+  ownerName            String?       @map("owner_name")
+  taxNumberMasked      String?       @map("tax_number_masked")
+  currencyCode         String        @map("currency_code")
+  currentBalance       Decimal       @map("current_balance") @db.Decimal(14, 2)
+  availableCreditLimit Decimal?      @map("available_credit_limit") @db.Decimal(14, 2)
+  creditLimit          Decimal?      @map("credit_limit") @db.Decimal(14, 2)
+  balanceDueDate       DateTime?     @map("balance_due_date")
+  balanceCloseDate     DateTime?     @map("balance_close_date")
+  status               AccountStatus
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pluggyItem   PluggyItem    @relation(fields: [pluggyItemId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([pluggyItemId])
+  @@index([status])
+  @@map("financial_accounts")
+}
+
+model Transaction {
+  id                      String            @id @default(uuid()) @db.Uuid
+  userId                  String            @map("user_id") @db.Uuid
+  accountId               String            @map("account_id") @db.Uuid
+  pluggyTransactionId     String            @unique @map("pluggy_transaction_id")
+  type                    TransactionType
+  status                  TransactionStatus
+  amount                  Decimal           @db.Decimal(14, 2)
+  balanceAfterTransaction Decimal?          @map("balance_after_transaction") @db.Decimal(14, 2)
+  currencyCode            String            @map("currency_code")
+  description             String
+  descriptionRaw          String?           @map("description_raw")
+  category                String?
+  categoryId              String?           @map("category_id")
+  merchantName            String?           @map("merchant_name")
+  transactionDate         DateTime          @map("transaction_date")
+  createdAt               DateTime          @default(now()) @map("created_at")
+  updatedAt               DateTime          @updatedAt @map("updated_at")
+
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account FinancialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([userId, transactionDate(sort: Desc)])
+  @@index([accountId, transactionDate(sort: Desc)])
+  @@index([type])
+  @@index([category])
+  @@index([status])
+  @@map("transactions")
+}
+
+model FinancialMetric {
+  id                   String   @id @default(uuid()) @db.Uuid
+  userId               String   @map("user_id") @db.Uuid
+  periodStart          DateTime @map("period_start")
+  periodEnd            DateTime @map("period_end")
+  totalIncome          Decimal  @map("total_income") @db.Decimal(14, 2)
+  totalExpense         Decimal  @map("total_expense") @db.Decimal(14, 2)
+  avgMonthlyIncome     Decimal  @map("avg_monthly_income") @db.Decimal(14, 2)
+  avgDailyIncome       Decimal  @map("avg_daily_income") @db.Decimal(14, 2)
+  incomeDays           Int      @map("income_days")
+  noIncomeDays         Int      @map("no_income_days")
+  incomeFrequencyScore Decimal  @map("income_frequency_score") @db.Decimal(5, 2)
+  incomeStabilityScore Decimal  @map("income_stability_score") @db.Decimal(5, 2)
+  expenseRatio         Decimal  @map("expense_ratio") @db.Decimal(5, 2)
+  averageBalance       Decimal  @map("average_balance") @db.Decimal(14, 2)
+  minBalance           Decimal  @map("min_balance") @db.Decimal(14, 2)
+  maxBalance           Decimal  @map("max_balance") @db.Decimal(14, 2)
+  calculatedAt         DateTime @map("calculated_at")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creditScores CreditScore[]
+
+  @@index([userId, periodStart, periodEnd])
+  @@map("financial_metrics")
+}
+
+model CreditScore {
+  id                    String         @id @default(uuid()) @db.Uuid
+  userId                String         @map("user_id") @db.Uuid
+  financialMetricId     String         @map("financial_metric_id") @db.Uuid
+  score                 Int
+  decision              CreditDecision
+  recommendedLimit      Decimal        @map("recommended_limit") @db.Decimal(14, 2)
+  incomeFrequencyPoints Int            @map("income_frequency_points")
+  incomeStabilityPoints Int            @map("income_stability_points")
+  cashflowPoints        Int            @map("cashflow_points")
+  balancePoints         Int            @map("balance_points")
+  riskPenalty           Int            @map("risk_penalty")
+  explanation           String         @db.Text
+  createdAt             DateTime       @default(now()) @map("created_at")
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  financialMetric FinancialMetric @relation(fields: [financialMetricId], references: [id], onDelete: Cascade)
+  creditRequests  CreditRequest[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([financialMetricId])
+  @@map("credit_scores")
+}
+
+model CreditRequest {
+  id              String              @id @default(uuid()) @db.Uuid
+  userId          String              @map("user_id") @db.Uuid
+  creditScoreId   String              @map("credit_score_id") @db.Uuid
+  requestedAmount Decimal             @map("requested_amount") @db.Decimal(14, 2)
+  approvedAmount  Decimal?            @map("approved_amount") @db.Decimal(14, 2)
+  status          CreditRequestStatus
+  requestedAt     DateTime            @map("requested_at")
+  decidedAt       DateTime?           @map("decided_at")
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creditScore CreditScore @relation(fields: [creditScoreId], references: [id], onDelete: Restrict)
+
+  @@index([userId, status])
+  @@index([creditScoreId])
+  @@map("credit_requests")
+}
+
+model SyncLog {
+  id                 String     @id @default(uuid()) @db.Uuid
+  pluggyItemId       String     @map("pluggy_item_id") @db.Uuid
+  status             SyncStatus
+  startedAt          DateTime   @map("started_at")
+  finishedAt         DateTime?  @map("finished_at")
+  accountsSynced     Int        @default(0) @map("accounts_synced")
+  transactionsSynced Int        @default(0) @map("transactions_synced")
+  errorMessage       String?    @map("error_message")
+  metadata           Json?
+
+  pluggyItem PluggyItem @relation(fields: [pluggyItemId], references: [id], onDelete: Cascade)
+
+  @@index([pluggyItemId, startedAt(sort: Desc)])
+  @@index([status])
+  @@map("sync_logs")
+}
+
+enum PluggyItemStatus {
+  CREATED
+  WAITING_USER_INPUT
+  UPDATING
+  UPDATED
+  LOGIN_ERROR
+  OUTDATED
+  ERROR
+
+  @@map("pluggy_item_status")
+}
+
+enum PluggyExecutionStatus {
+  SUCCESS
+  PARTIAL_SUCCESS
+  ERROR
+  RUNNING
+
+  @@map("pluggy_execution_status")
+}
+
+enum ConsentStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  ERROR
+
+  @@map("consent_status")
+}
+
+enum AccountType {
+  BANK
+  CREDIT
+  INVESTMENT
+  LOAN
+  OTHER
+
+  @@map("account_type")
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+
+  @@map("account_status")
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+
+  @@map("transaction_type")
+}
+
+enum TransactionStatus {
+  POSTED
+  PENDING
+
+  @@map("transaction_status")
+}
+
+enum CreditDecision {
+  APPROVED
+  MANUAL_REVIEW
+  REJECTED
+
+  @@map("credit_decision")
+}
+
+enum CreditRequestStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  CANCELLED
+
+  @@map("credit_request_status")
+}
+
+enum SyncStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL_SUCCESS
+  ERROR
+
+  @@map("sync_status")
+}

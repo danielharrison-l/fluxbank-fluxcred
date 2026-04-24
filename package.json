@@ -10,6 +10,10 @@
   "license": "MIT",
   "author": "Loci Team",
   "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "prisma": "pnpm --dir apps/api prisma",
+    "start:dev": "pnpm --dir apps/api start:dev"
+  },
   "devDependencies": {
     "@nx/js": "22.0.2",
     "@swc-node/core": "1.14.1",
