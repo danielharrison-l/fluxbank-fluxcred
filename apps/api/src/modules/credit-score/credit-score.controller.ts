@@ -16,6 +16,16 @@ export class CreditScoreController {
     return this.creditScoreService.findAll(request.user.id);
   }
 
+  @Get("latest")
+  findLatest(@Req() request: AuthenticatedRequest) {
+    return this.creditScoreService.findLatest(request.user.id);
+  }
+
+  @Post("calculate")
+  calculate(@Req() request: AuthenticatedRequest) {
+    return this.creditScoreService.calculate(request.user.id);
+  }
+
   @Post()
   create(
     @Req() request: AuthenticatedRequest,

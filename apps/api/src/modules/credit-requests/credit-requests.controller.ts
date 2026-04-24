@@ -26,6 +26,11 @@ export class CreditRequestsController {
     return this.creditRequestsService.findAll(request.user.id);
   }
 
+  @Get(":id")
+  findById(@Req() request: AuthenticatedRequest, @Param("id") id: string) {
+    return this.creditRequestsService.findById(request.user.id, id);
+  }
+
   @Post()
   create(
     @Req() request: AuthenticatedRequest,

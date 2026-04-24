@@ -295,6 +295,7 @@ enum CreditDecision {
 enum CreditRequestStatus {
   REQUESTED
   APPROVED
+  REVIEW
   REJECTED
   CANCELLED
 
