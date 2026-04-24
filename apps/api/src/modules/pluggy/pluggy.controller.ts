@@ -26,8 +26,16 @@ export class PluggyController {
     return this.pluggyService.createConnectToken(request.user.id);
   }
 
-  @Post("item")
+  @Post("items")
   saveItem(
+    @Req() request: AuthenticatedRequest,
+    @Body() data: SavePluggyItemDto,
+  ) {
+    return this.pluggyService.saveItem(request.user.id, data.itemId);
+  }
+
+  @Post("item")
+  saveItemLegacy(
     @Req() request: AuthenticatedRequest,
     @Body() data: SavePluggyItemDto,
   ) {
@@ -40,6 +48,22 @@ export class PluggyController {
     @Param("itemId") itemId: string,
   ) {
     return this.pluggyService.syncItem(request.user.id, itemId);
+  }
+
+  @Post("sync/:itemId/accounts")
+  syncAccounts(
+    @Req() request: AuthenticatedRequest,
+    @Param("itemId") itemId: string,
+  ) {
+    return this.pluggyService.syncAccounts(request.user.id, itemId);
+  }
+
+  @Post("sync/:itemId/transactions")
+  syncTransactions(
+    @Req() request: AuthenticatedRequest,
+    @Param("itemId") itemId: string,
+  ) {
+    return this.pluggyService.syncTransactions(request.user.id, itemId);
   }
 
   @Get("items")

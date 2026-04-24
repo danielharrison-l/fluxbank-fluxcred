@@ -1,4 +1,14 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadGatewayException,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import {
   AccountStatus,
   AccountType,
@@ -12,12 +22,21 @@ import axios, { AxiosInstance } from "axios";
 import { PrismaService } from "@/infra/database/prisma.service";
 
 type PluggyAuthResponse = {
-  apiKey: string;
+  apiKey?: string;
+  accessToken?: string;
+};
+
+type PluggyConnectTokenResponse = {
+  connectToken?: string;
+  accessToken?: string;
+  token?: string;
 };
 
 type PluggyListResponse<T> = {
   results?: T[];
   total?: number;
+  totalPages?: number;
+  page?: number;
 };
 
 type PluggyItemResponse = {
@@ -63,6 +82,12 @@ type PluggyTransactionResponse = {
   date?: string;
 };
 
+type PluggyMappedError = {
+  code: string;
+  message: string;
+  statusCode?: number;
+};
+
 @Injectable()
 export class PluggyService {
   private accessToken?: string;
@@ -89,93 +114,168 @@ export class PluggyService {
     const clientSecret = process.env.PLUGGY_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-      throw new Error(
+      throw new BadRequestException(
         "PLUGGY_CLIENT_ID and PLUGGY_CLIENT_SECRET must be defined",
       );
     }
 
-    const { data } = await this.http.post<PluggyAuthResponse>("/auth", {
-      clientId,
-      clientSecret,
-    });
+    try {
+      const { data } = await this.http.post<PluggyAuthResponse>("/auth", {
+        clientId,
+        clientSecret,
+      });
 
-    this.accessToken = data.apiKey;
-    this.accessTokenExpiresAt = Date.now() + 1000 * 60 * 90;
+      const accessToken = data.apiKey ?? data.accessToken;
 
-    return this.accessToken;
+      if (!accessToken) {
+        throw new BadGatewayException(
+          "Pluggy auth response did not include an access token",
+        );
+      }
+
+      this.accessToken = accessToken;
+      this.accessTokenExpiresAt = Date.now() + 1000 * 60 * 90;
+
+      return this.accessToken;
+    } catch (error) {
+      throw this.mapPluggyError(error, "Failed to authenticate with Pluggy");
+    }
   }
 
   async createConnectToken(userId: string) {
     const token = await this.authenticate();
-    const { data } = await this.http.post(
-      "/connect_token",
-      { clientUserId: userId },
-      { headers: this.authorizationHeader(token) },
-    );
+    try {
+      const { data } = await this.http.post<PluggyConnectTokenResponse>(
+        "/connect_token",
+        {
+          options: {
+            clientUserId: userId,
+          },
+        },
+        { headers: this.authorizationHeader(token) },
+      );
 
-    return data;
+      const connectToken = data.connectToken ?? data.accessToken ?? data.token;
+
+      if (!connectToken) {
+        throw new BadGatewayException(
+          "Pluggy response did not include a connect token",
+        );
+      }
+
+      return { connectToken };
+    } catch (error) {
+      throw this.mapPluggyError(error, "Failed to create Pluggy connect token");
+    }
   }
 
   async getItem(itemId: string) {
     const token = await this.authenticate();
-    const { data } = await this.http.get<PluggyItemResponse>(
-      `/items/${itemId}`,
-      {
-        headers: this.authorizationHeader(token),
-      },
-    );
+    try {
+      const { data } = await this.http.get<PluggyItemResponse>(
+        `/items/${itemId}`,
+        {
+          headers: this.authorizationHeader(token),
+        },
+      );
 
-    return data;
+      return data;
+    } catch (error) {
+      throw this.mapPluggyError(error, "Unable to fetch Pluggy item");
+    }
   }
 
   async getAccounts(itemId: string) {
     const token = await this.authenticate();
-    const { data } = await this.http.get<
-      PluggyListResponse<PluggyAccountResponse>
-    >(`/accounts?itemId=${itemId}`, {
-      headers: this.authorizationHeader(token),
-    });
+    try {
+      const { data } = await this.http.get<
+        PluggyListResponse<PluggyAccountResponse>
+      >(`/accounts?itemId=${itemId}`, {
+        headers: this.authorizationHeader(token),
+      });
 
-    return data.results ?? [];
+      return data.results ?? [];
+    } catch (error) {
+      throw this.mapPluggyError(error, "Unable to fetch Pluggy accounts");
+    }
   }
 
   async getTransactions(accountId: string) {
-    const token = await this.authenticate();
-    const { data } = await this.http.get<
-      PluggyListResponse<PluggyTransactionResponse>
-    >(`/transactions?accountId=${accountId}`, {
-      headers: this.authorizationHeader(token),
-    });
-
+    const data = await this.getTransactionsPage(accountId, 1);
     return data.results ?? [];
   }
 
-  async saveItem(userId: string, itemId: string) {
-    const item = await this.getItem(itemId);
+  async getTransactionsPage(accountId: string, page: number) {
+    const token = await this.authenticate();
+    try {
+      const { data } = await this.http.get<
+        PluggyListResponse<PluggyTransactionResponse>
+      >(`/transactions?accountId=${accountId}&page=${page}`, {
+        headers: this.authorizationHeader(token),
+      });
 
-    return this.prisma.pluggyItem.upsert({
-      where: { pluggyItemId: item.id },
-      update: {
-        connectorId: item.connector?.id,
-        institutionName: item.connector?.name,
-        status: this.mapPluggyItemStatus(item.status),
-        statusDetail: item.statusDetail,
-        executionStatus: this.mapExecutionStatus(item.executionStatus),
-        lastUpdatedAt: this.parseDate(item.updatedAt),
-        errorCode: null,
-        errorMessage: null,
-      },
-      create: {
-        userId,
-        pluggyItemId: item.id,
-        connectorId: item.connector?.id,
-        institutionName: item.connector?.name,
-        status: this.mapPluggyItemStatus(item.status),
-        statusDetail: item.statusDetail,
-        executionStatus: this.mapExecutionStatus(item.executionStatus),
-        lastUpdatedAt: this.parseDate(item.updatedAt),
-      },
-    });
+      return data;
+    } catch (error) {
+      const mappedError = this.toPluggyMappedError(error);
+
+      if (mappedError.statusCode === 404) {
+        return { results: [], page, totalPages: page };
+      }
+
+      throw this.toHttpException(mappedError);
+    }
+  }
+
+  async saveItem(userId: string, itemId: string) {
+    try {
+      const item = await this.getItem(itemId);
+
+      return this.prisma.pluggyItem.upsert({
+        where: { pluggyItemId: item.id },
+        update: {
+          userId,
+          connectorId: item.connector?.id,
+          institutionName: item.connector?.name,
+          status: this.mapPluggyItemStatus(item.status),
+          statusDetail: item.statusDetail,
+          executionStatus: this.mapExecutionStatus(item.executionStatus),
+          lastUpdatedAt: this.parseDate(item.updatedAt),
+          errorCode: null,
+          errorMessage: null,
+        },
+        create: {
+          userId,
+          pluggyItemId: item.id,
+          connectorId: item.connector?.id,
+          institutionName: item.connector?.name,
+          status: this.mapPluggyItemStatus(item.status),
+          statusDetail: item.statusDetail,
+          executionStatus: this.mapExecutionStatus(item.executionStatus),
+          lastUpdatedAt: this.parseDate(item.updatedAt),
+        },
+      });
+    } catch (error) {
+      const mappedError = this.toPluggyMappedError(error);
+
+      await this.prisma.pluggyItem.upsert({
+        where: { pluggyItemId: itemId },
+        update: {
+          userId,
+          status: PluggyItemStatus.ERROR,
+          errorCode: mappedError.code,
+          errorMessage: mappedError.message,
+        },
+        create: {
+          userId,
+          pluggyItemId: itemId,
+          status: PluggyItemStatus.ERROR,
+          errorCode: mappedError.code,
+          errorMessage: mappedError.message,
+        },
+      });
+
+      throw this.toHttpException(mappedError);
+    }
   }
 
   async listItems(userId: string) {
@@ -183,6 +283,150 @@ export class PluggyService {
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  async syncAccounts(userId: string, itemId: string) {
+    const pluggyItem = await this.prisma.pluggyItem.findFirst({
+      where: { userId, pluggyItemId: itemId },
+    });
+
+    if (!pluggyItem) {
+      throw new NotFoundException("Pluggy item not found");
+    }
+
+    const syncLog = await this.prisma.syncLog.create({
+      data: {
+        pluggyItemId: pluggyItem.id,
+        status: SyncStatus.RUNNING,
+        startedAt: new Date(),
+      },
+    });
+
+    try {
+      const accounts = await this.getAccounts(itemId);
+      const syncedAccounts = [];
+
+      for (const account of accounts) {
+        const syncedAccount = await this.prisma.financialAccount.upsert({
+          where: { pluggyAccountId: account.id },
+          update: this.mapAccountUpdate(account),
+          create: {
+            userId,
+            pluggyItemId: pluggyItem.id,
+            pluggyAccountId: account.id,
+            ...this.mapAccountUpdate(account),
+          },
+        });
+
+        syncedAccounts.push(syncedAccount);
+      }
+
+      await this.prisma.syncLog.update({
+        where: { id: syncLog.id },
+        data: {
+          status: SyncStatus.SUCCESS,
+          finishedAt: new Date(),
+          accountsSynced: syncedAccounts.length,
+        },
+      });
+
+      return syncedAccounts;
+    } catch (error) {
+      const mappedError = this.toPluggyMappedError(error);
+
+      await this.markPluggyItemSyncError(pluggyItem.id, mappedError);
+      await this.markSyncLogError(syncLog.id, mappedError);
+
+      throw this.toHttpException(mappedError);
+    }
+  }
+
+  async syncTransactions(userId: string, itemId: string) {
+    const pluggyItem = await this.prisma.pluggyItem.findFirst({
+      where: { userId, pluggyItemId: itemId },
+    });
+
+    if (!pluggyItem) {
+      throw new NotFoundException("Pluggy item not found");
+    }
+
+    const accounts = await this.prisma.financialAccount.findMany({
+      where: {
+        userId,
+        pluggyItemId: pluggyItem.id,
+      },
+    });
+
+    const syncLog = await this.prisma.syncLog.create({
+      data: {
+        pluggyItemId: pluggyItem.id,
+        status: SyncStatus.RUNNING,
+        startedAt: new Date(),
+      },
+    });
+
+    const accountErrors: Array<{ accountId: string; message: string }> = [];
+    let transactionsSynced = 0;
+
+    for (const account of accounts) {
+      try {
+        let page = 1;
+        let totalPages = 1;
+
+        do {
+          const response = await this.getTransactionsPage(
+            account.pluggyAccountId,
+            page,
+          );
+          const transactions = response.results ?? [];
+
+          for (const transaction of transactions) {
+            await this.prisma.transaction.upsert({
+              where: { pluggyTransactionId: transaction.id },
+              update: this.mapTransactionUpdate(transaction),
+              create: {
+                userId,
+                accountId: account.id,
+                pluggyTransactionId: transaction.id,
+                ...this.mapTransactionUpdate(transaction),
+              },
+            });
+
+            transactionsSynced += 1;
+          }
+
+          totalPages = response.totalPages ?? page;
+          page += 1;
+        } while (page <= totalPages);
+      } catch (error) {
+        const mappedError = this.toPluggyMappedError(error);
+        accountErrors.push({
+          accountId: account.id,
+          message: mappedError.message,
+        });
+      }
+    }
+
+    await this.prisma.syncLog.update({
+      where: { id: syncLog.id },
+      data: {
+        status: accountErrors.length
+          ? SyncStatus.PARTIAL_SUCCESS
+          : SyncStatus.SUCCESS,
+        finishedAt: new Date(),
+        accountsSynced: accounts.length,
+        transactionsSynced,
+        errorMessage: accountErrors.length
+          ? "Some accounts failed to sync transactions"
+          : null,
+        metadata: accountErrors.length ? { accountErrors } : undefined,
+      },
+    });
+
+    return {
+      accountsSynced: accounts.length,
+      transactionsSynced,
+    };
   }
 
   async syncItem(userId: string, itemId: string) {
@@ -260,34 +504,189 @@ export class PluggyService {
         },
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown sync error";
+      const mappedError = this.toPluggyMappedError(error);
 
-      await this.prisma.pluggyItem.update({
-        where: { id: pluggyItem.id },
-        data: {
-          status: PluggyItemStatus.ERROR,
-          errorMessage,
-        },
+      await this.markPluggyItemSyncError(pluggyItem.id, mappedError);
+      await this.markSyncLogError(syncLog.id, mappedError, {
+        accountsSynced,
+        transactionsSynced,
       });
 
-      await this.prisma.syncLog.update({
-        where: { id: syncLog.id },
-        data: {
-          status: SyncStatus.ERROR,
-          finishedAt: new Date(),
-          accountsSynced,
-          transactionsSynced,
-          errorMessage,
-        },
-      });
-
-      throw error;
+      throw this.toHttpException(mappedError);
     }
   }
 
   private authorizationHeader(token: string) {
-    return { Authorization: `Bearer ${token}` };
+    return { "X-API-KEY": token };
+  }
+
+  private mapPluggyError(error: unknown, fallbackMessage: string) {
+    return this.toHttpException(
+      this.toPluggyMappedError(error, fallbackMessage),
+    );
+  }
+
+  private toPluggyMappedError(
+    error: unknown,
+    fallbackMessage = "Pluggy integration error",
+  ): PluggyMappedError {
+    if (axios.isAxiosError(error)) {
+      const statusCode = error.response?.status;
+      const rawCode =
+        typeof error.response?.data === "object" &&
+        error.response?.data &&
+        "code" in error.response.data
+          ? String(error.response.data.code)
+          : undefined;
+      const rawMessage =
+        typeof error.response?.data === "object" &&
+        error.response?.data &&
+        "message" in error.response.data
+          ? String(error.response.data.message)
+          : undefined;
+
+      if (statusCode === 401 || statusCode === 403) {
+        this.clearAccessToken();
+      }
+
+      return {
+        code: rawCode ?? this.mapPluggyErrorCode(statusCode),
+        message:
+          rawMessage ?? this.mapPluggyErrorMessage(statusCode, fallbackMessage),
+        statusCode,
+      };
+    }
+
+    if (
+      error instanceof UnauthorizedException ||
+      error instanceof BadRequestException ||
+      error instanceof ServiceUnavailableException ||
+      error instanceof BadGatewayException ||
+      error instanceof InternalServerErrorException
+    ) {
+      const httpError = error as HttpException;
+      const response = httpError.getResponse();
+      return {
+        code: httpError.name,
+        message:
+          typeof response === "object" && response && "message" in response
+            ? String(response.message)
+            : httpError.message,
+        statusCode: httpError.getStatus(),
+      };
+    }
+
+    return {
+      code: "PLUGGY_UNKNOWN_ERROR",
+      message: error instanceof Error ? error.message : fallbackMessage,
+    };
+  }
+
+  private toHttpException(error: PluggyMappedError) {
+    if (error.statusCode === 401 || error.statusCode === 403) {
+      return new UnauthorizedException(error.message);
+    }
+
+    if (error.statusCode === 404) {
+      return new NotFoundException(error.message);
+    }
+
+    if (error.statusCode === 429) {
+      return new HttpException(error.message, HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    if (!error.statusCode || error.statusCode >= 500) {
+      return new ServiceUnavailableException(error.message);
+    }
+
+    return new BadGatewayException({
+      code: error.code,
+      message: error.message,
+      statusCode: error.statusCode,
+    });
+  }
+
+  private mapPluggyErrorCode(statusCode?: number) {
+    if (statusCode === 401 || statusCode === 403) {
+      return "PLUGGY_AUTH_ERROR";
+    }
+
+    if (statusCode === 404) {
+      return "PLUGGY_NOT_FOUND";
+    }
+
+    if (statusCode === 429) {
+      return "PLUGGY_RATE_LIMIT";
+    }
+
+    if (!statusCode || statusCode >= 500) {
+      return "PLUGGY_UNAVAILABLE";
+    }
+
+    return "PLUGGY_REQUEST_ERROR";
+  }
+
+  private mapPluggyErrorMessage(
+    statusCode: number | undefined,
+    fallback: string,
+  ) {
+    if (statusCode === 401 || statusCode === 403) {
+      return "Não foi possível autenticar na Pluggy. Verifique as credenciais configuradas.";
+    }
+
+    if (statusCode === 404) {
+      return "O item ou recurso informado não foi encontrado na Pluggy.";
+    }
+
+    if (statusCode === 429) {
+      return "A Pluggy recebeu muitas requisições. Tente novamente em alguns instantes.";
+    }
+
+    if (!statusCode || statusCode >= 500) {
+      return "A Pluggy está indisponível no momento. Tente novamente mais tarde.";
+    }
+
+    return fallback;
+  }
+
+  private clearAccessToken() {
+    this.accessToken = undefined;
+    this.accessTokenExpiresAt = undefined;
+  }
+
+  private async markPluggyItemSyncError(
+    pluggyItemId: string,
+    error: PluggyMappedError,
+  ) {
+    await this.prisma.pluggyItem.update({
+      where: { id: pluggyItemId },
+      data: {
+        status: PluggyItemStatus.ERROR,
+        errorCode: error.code,
+        errorMessage: error.message,
+      },
+    });
+  }
+
+  private async markSyncLogError(
+    syncLogId: string,
+    error: PluggyMappedError,
+    counters?: { accountsSynced?: number; transactionsSynced?: number },
+  ) {
+    await this.prisma.syncLog.update({
+      where: { id: syncLogId },
+      data: {
+        status: SyncStatus.ERROR,
+        finishedAt: new Date(),
+        accountsSynced: counters?.accountsSynced,
+        transactionsSynced: counters?.transactionsSynced,
+        errorMessage: error.message,
+        metadata: {
+          errorCode: error.code,
+          statusCode: error.statusCode,
+        },
+      },
+    });
   }
 
   private mapAccountUpdate(account: PluggyAccountResponse) {
