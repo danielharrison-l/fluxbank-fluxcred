@@ -1,9 +1,11 @@
-import { IsDateString } from "class-validator";
+import { IsDateString, IsOptional } from "class-validator";
 
 export class CreateFinancialMetricDto {
+  @IsOptional()
   @IsDateString()
-  periodStart!: string;
+  periodStart?: string;
 
+  @IsOptional()
   @IsDateString()
-  periodEnd!: string;
+  periodEnd?: string;
 }

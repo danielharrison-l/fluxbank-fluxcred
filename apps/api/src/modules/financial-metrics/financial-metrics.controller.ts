@@ -18,6 +18,11 @@ export class FinancialMetricsController {
     return this.financialMetricsService.findAll(request.user.id);
   }
 
+  @Get("latest")
+  findLatest(@Req() request: AuthenticatedRequest) {
+    return this.financialMetricsService.findLatest(request.user.id);
+  }
+
   @Post("calculate")
   calculate(
     @Req() request: AuthenticatedRequest,
