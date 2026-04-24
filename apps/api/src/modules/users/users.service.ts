@@ -35,4 +35,15 @@ export class UsersService {
       where: { id },
     });
   }
+
+  async findSafeById(id: string) {
+    const user = await this.findById(id);
+
+    if (!user) {
+      return null;
+    }
+
+    const { passwordHash: _passwordHash, ...safeUser } = user;
+    return safeUser;
+  }
 }
