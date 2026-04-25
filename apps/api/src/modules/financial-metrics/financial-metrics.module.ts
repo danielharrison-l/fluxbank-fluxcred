@@ -5,5 +5,6 @@ import { FinancialMetricsService } from "./financial-metrics.service";
 @Module({
   controllers: [FinancialMetricsController],
   providers: [FinancialMetricsService],
+  exports: [FinancialMetricsService],
 })
 export class FinancialMetricsModule {}

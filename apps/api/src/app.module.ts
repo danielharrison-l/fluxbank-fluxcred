@@ -8,6 +8,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { CreditRequestsModule } from "./modules/credit-requests/credit-requests.module";
 import { CreditScoreModule } from "./modules/credit-score/credit-score.module";
 import { DashboardModule } from "./modules/dashboard/dashboard.module";
+import { DemoModule } from "./modules/demo/demo.module";
 import { FinancialMetricsModule } from "./modules/financial-metrics/financial-metrics.module";
 import { PluggyModule } from "./modules/pluggy/pluggy.module";
 import { TransactionsModule } from "./modules/transactions/transactions.module";
@@ -25,6 +26,7 @@ import { UsersModule } from "./modules/users/users.module";
     AccountsModule,
     TransactionsModule,
     DashboardModule,
+    DemoModule,
     FinancialMetricsModule,
     CreditScoreModule,
     CreditRequestsModule,
