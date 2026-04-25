@@ -23,6 +23,7 @@ O arquivo `apps/api/.env` não deve ser commitado.
 ## Documentação
 
 - [Documento da Solução](docs/solution.md)
+- [Organização do Repositório](docs/repository.md)
 - [Infraestrutura e Deploy](docs/infrastructure.md)
 - [Diagrama de Arquitetura](docs/architecture-diagram.mmd)
 - [Melhorias Futuras](docs/future-improvements.md)
