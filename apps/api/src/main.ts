@@ -6,7 +6,9 @@ import { AppModule } from "./app.module";
 
 function getAllowedOrigins() {
   const configuredOrigins = process.env.CORS_ORIGIN?.split(",")
-    .map((origin) => origin.trim())
+    .map((origin) =>
+      origin.trim().replace(/^['"]+|['"]+$/g, "").replace(/\/$/, ""),
+    )
     .filter(Boolean);
 
   if (!configuredOrigins?.length) {
@@ -23,17 +25,7 @@ async function bootstrap() {
   const allowedOrigins = getAllowedOrigins();
 
   app.enableCors({
-    origin: (
-      origin: string | undefined,
-      callback: (error: Error | null, allow?: boolean) => void,
-    ) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-
-      callback(new Error("Origin not allowed by CORS"), false);
-    },
+    origin: allowedOrigins,
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: false,
