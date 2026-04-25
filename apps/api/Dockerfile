@@ -32,6 +32,7 @@ RUN set -eux; \
   prisma_client_dir="$(find /out/node_modules/.pnpm -type d -path '*/node_modules/@prisma/client' | head -n 1)"; \
   prisma_node_modules_dir="$(dirname "$(dirname "$prisma_client_dir")")"; \
   cp -R "$prisma_source" "$prisma_node_modules_dir/.prisma"
+RUN mkdir -p /out/prisma && cp apps/api/prisma/schema.prisma /out/prisma/schema.prisma
 
 
 
