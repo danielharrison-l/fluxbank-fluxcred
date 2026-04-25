@@ -1,150 +1,135 @@
-# Documento da Solucao
+# Documento da Solução
 
-## 1. Visao Geral
+## 1. Visão Geral
 
 ### Problema
 
-Autonomos e profissionais liberais podem ter dificuldade para acessar credito quando a avaliacao depende de comprovantes tradicionais de renda. O projeto busca demonstrar uma forma simples de avaliar comportamento financeiro a partir de movimentacoes, saldo e recorrencia de renda.
+Autônomos e profissionais liberais podem ter dificuldade para acessar crédito quando a avaliação depende de comprovantes tradicionais de renda. O projeto busca demonstrar uma forma simples de avaliar comportamento financeiro a partir de movimentações, saldo e recorrência de renda.
 
-### Solucao
+### Solução
 
-O FluxCred permite criar uma conta, conectar um perfil demonstrativo, visualizar dashboard financeiro, consultar score de credito e solicitar credito. Em ambiente local, os perfis demo geram contas, transacoes, metricas e score sem depender de integracao bancaria externa.
+O FluxCred permite criar uma conta, conectar um perfil demonstrativo, visualizar o dashboard financeiro, consultar score de crédito e solicitar crédito. Em ambiente local, os perfis demo geram contas, transações, métricas e score sem depender de integração bancária externa.
 
 ## 2. Arquitetura
 
 ### Diagrama
 
-O diagrama esta em [architecture-diagram.mmd](./architecture-diagram.mmd).
+O diagrama está em [architecture-diagram.mmd](./architecture-diagram.mmd).
 
 ```mermaid
 flowchart LR
-  User[Usuario] --> Web[Frontend React/Vite]
+  User[Usuário] --> Web[Frontend React/Vite]
   Web --> API[API NestJS]
-  API --> Auth[Modulo Auth]
-  API --> Demo[Modulo Demo]
-  API --> Metrics[Metricas Financeiras]
-  API --> Score[Score de Credito]
-  API --> Requests[Solicitacoes de Credito]
+  API --> Auth[Módulo Auth]
+  API --> Demo[Módulo Demo]
+  API --> Metrics[Métricas Financeiras]
+  API --> Score[Score de Crédito]
+  API --> Requests[Solicitações de Crédito]
   API --> DB[(PostgreSQL)]
   Auth --> DB
   Demo --> DB
   Metrics --> DB
   Score --> DB
   Requests --> DB
-  API --> Mail[Email: console local ou Resend]
+  API --> Mail[E-mail: console local ou Resend]
 ```
 
 ### Principais Componentes
 
-- Frontend: aplicacao React com Vite para cadastro, login, dashboard, analise, score, conexao demo e solicitacao de credito.
-- API: backend NestJS com modulos de autenticacao, usuarios, demo, contas, transacoes, metricas, score e solicitacoes.
+- Frontend: aplicação React com Vite para cadastro, login, dashboard, análise, score, conexão demo e solicitação de crédito.
+- API: backend NestJS com módulos de autenticação, usuários, demo, contas, transações, métricas, score e solicitações.
 - Banco: PostgreSQL acessado via Prisma.
-- Email: em desenvolvimento, os links de verificacao e reset sao impressos no console; em producao, pode ser usado Resend.
-- Demo: gera massa de dados local para quatro perfis financeiros: excelente, aprovado, limitrofe e recusado.
+- E-mail: em desenvolvimento, os links de verificação e redefinição de senha são impressos no console; em produção, pode ser usado Resend.
+- Demo: gera massa de dados local para quatro perfis financeiros: excelente, aprovado, limítrofe e recusado.
 
-### Infraestrutura e Deploy
-
-Para hospedar o projeto, foi utilizada uma VPS da Hostinger com Dokploy autohospedado. O Dokploy centraliza a configuracao e a operacao dos servicos, incluindo deploy automatizado, gerenciamento de aplicacoes, variaveis de ambiente, logs e configuracoes de infraestrutura.
-
-A exposicao publica dos servicos usa proxy reverso com Traefik, permitindo rotear os subdominios para os containers/servicos corretos. Os apontamentos de DNS dos subdominios sao feitos pela Cloudflare, que tambem facilita a gestao do dominio e da camada de DNS.
-
-O envio de emails transacionais usa o plano gratuito da Resend, configurado com o dominio do projeto. Essa configuracao permite enviar emails de verificacao de conta e recuperacao de senha usando um remetente do proprio dominio.
-
-Resumo da infraestrutura:
-
-- VPS: Hostinger.
-- Orquestracao/deploy: Dokploy autohospedado.
-- Proxy reverso: Traefik.
-- DNS/subdominios: Cloudflare.
-- Email transacional: Resend no plano gratuito.
-- Deploy: automatizado via recursos do Dokploy.
+A infraestrutura usada para deploy está documentada em [Infraestrutura e Deploy](./infrastructure.md).
 
 ## 3. Modelo de Score
 
 ### Dados Utilizados
 
-O score usa metricas derivadas das transacoes do usuario:
+O score usa métricas derivadas das transações do usuário:
 
-- frequencia de renda;
+- frequência de renda;
 - estabilidade da renda;
-- relacao entre despesas e receitas;
-- saldo medio;
-- volume medio de renda;
+- relação entre despesas e receitas;
+- saldo médio;
+- volume médio de renda;
 - penalidades de risco.
 
-### Calculo das Metricas
+### Cálculo das Métricas
 
-As metricas financeiras sao calculadas a partir de um periodo informado ou dos ultimos 90 dias:
+As métricas financeiras são calculadas a partir de um período informado ou dos últimos 90 dias:
 
-- `totalIncome`: soma das transacoes de credito.
-- `totalExpense`: soma absoluta das transacoes de debito.
-- `avgMonthlyIncome`: renda media mensal.
+- `totalIncome`: soma das transações de crédito.
+- `totalExpense`: soma absoluta das transações de débito.
+- `avgMonthlyIncome`: renda média mensal.
 - `incomeDays`: dias com entrada de renda.
 - `noIncomeDays`: dias sem entrada.
 - `expenseRatio`: despesas divididas por receitas.
-- `averageBalance`: media dos saldos apos transacoes.
+- `averageBalance`: média dos saldos após transações.
 
-### Calculo do Score
+### Cálculo do Score
 
-O score final vai de 0 a 1000. Primeiro e calculada uma base de 0 a 100:
+O score final vai de 0 a 1000. Primeiro, é calculada uma base de 0 a 100:
 
-- frequencia de renda: ate 25 pontos;
-- estabilidade da renda: ate 20 pontos;
-- fluxo de caixa: ate 20 pontos;
-- saldo medio: ate 15 pontos;
-- volume de renda: ate 10 pontos;
-- penalidade de risco: ate 30 pontos negativos.
+- frequência de renda: até 25 pontos;
+- estabilidade da renda: até 20 pontos;
+- fluxo de caixa: até 20 pontos;
+- saldo médio: até 15 pontos;
+- volume de renda: até 10 pontos;
+- penalidade de risco: até 30 pontos negativos.
 
-A base e limitada entre 0 e 100 e multiplicada por 10.
+A base é limitada entre 0 e 100 e multiplicada por 10.
 
-### Regras de Aprovacao
+### Regras de Aprovação
 
 - Score igual ou superior a 600: aprovado.
 - Score abaixo de 600: recusado.
-- Para score igual ou superior a 800, o limite recomendado e 30% da renda media mensal.
-- Para score entre 600 e 799, o limite recomendado e 15% da renda media mensal.
-- A solicitacao de credito e aprovada apenas se o valor solicitado estiver dentro do limite recomendado.
+- Para score igual ou superior a 800, o limite recomendado é 30% da renda média mensal.
+- Para score entre 600 e 799, o limite recomendado é 15% da renda média mensal.
+- A solicitação de crédito é aprovada apenas se o valor solicitado estiver dentro do limite recomendado.
 
-## 4. Decisoes Tecnicas
+## 4. Decisões Técnicas
 
 ### Tecnologias Escolhidas
 
 - NestJS: estrutura modular para a API.
 - Prisma: acesso tipado ao PostgreSQL e migrations versionadas.
-- PostgreSQL: banco relacional adequado para usuarios, contas, transacoes e historico de score.
-- React + Vite: frontend leve, rapido e simples de executar localmente.
+- PostgreSQL: banco relacional adequado para usuários, contas, transações e histórico de score.
+- React + Vite: frontend leve, rápido e simples de executar localmente.
 - TanStack Query: carregamento e cache de dados no frontend.
-- Tailwind CSS: construcao rapida de interfaces responsivas.
-- Resend: opcao simples para envio real de email.
-- Dokploy: facilita deploy, configuracao de servicos, logs e automacao em uma VPS propria.
-- Traefik: proxy reverso para expor API e frontend por subdominios.
-- Cloudflare: gerenciamento de DNS e apontamento dos subdominios.
+- Tailwind CSS: construção rápida de interfaces responsivas.
+- Resend: opção simples para envio real de e-mail.
+- Dokploy: facilita deploy, configuração de serviços, logs e automação em uma VPS própria.
+- Traefik: proxy reverso para expor API e frontend por subdomínios.
+- Cloudflare: gerenciamento de DNS e apontamento dos subdomínios.
 
 ### Trade-offs
 
-- O projeto usa dados demonstrativos locais em vez de integracao bancaria real neste momento. Isso reduz dependencia externa e facilita testes, mas nao representa conectividade real com bancos.
-- A verificacao de email e mantida no fluxo local usando links no console. Isso preserva o comportamento real sem exigir conta de email transacional.
-- O modelo de score e deterministico e simples. Ele e explicavel, mas nao substitui modelos estatisticos ou validacao com dados reais.
-- O refresh token usa cookie HTTP-only, enquanto o access token fica em memoria no frontend. Isso reduz persistencia indevida do token de acesso, mas exige refresh apos reload.
+- O projeto usa dados demonstrativos locais em vez de integração bancária real neste momento. Isso reduz dependência externa e facilita testes, mas não representa conectividade real com bancos.
+- A verificação de e-mail é mantida no fluxo local usando links no console. Isso preserva o comportamento real sem exigir conta de e-mail transacional.
+- O modelo de score é determinístico e simples. Ele é explicável, mas não substitui modelos estatísticos ou validação com dados reais.
+- O refresh token usa cookie HTTP-only, enquanto o access token fica em memória no frontend. Isso reduz persistência indevida do token de acesso, mas exige refresh após reload.
 
-## 5. Limitacoes e Melhorias Futuras
+## 5. Limitações e Melhorias Futuras
 
-### Limitacoes
+### Limitações
 
-- Nao ha integracao bancaria externa ativa.
-- O score foi definido por regras fixas e nao por modelo treinado.
-- Os perfis demo sao sinteticos.
-- Nao ha painel administrativo.
-- O fluxo de credito aprova ou recusa automaticamente; nao ha revisao manual.
-- A nomenclatura interna ainda possui referencias historicas a `pluggy` em entidades de banco usadas como conexoes.
+- Não há integração bancária externa ativa.
+- O score foi definido por regras fixas e não por modelo treinado.
+- Os perfis demo são sintéticos.
+- Não há painel administrativo.
+- O fluxo de crédito aprova ou recusa automaticamente; não há revisão manual.
+- A nomenclatura interna ainda possui referências históricas a `pluggy` em entidades de banco usadas como conexões.
 
 ### Melhorias Futuras
 
-- Renomear entidades internas de conexao para termos neutros, como `connectionItem`.
+- Renomear entidades internas de conexão para termos neutros, como `connectionItem`.
 - Adicionar testes automatizados para garantir faixas esperadas dos perfis demo.
-- Criar testes e2e cobrindo cadastro, verificacao por console, login, conexao demo, score e solicitacao de credito.
-- Reintroduzir uma integracao bancaria real quando houver credenciais e escopo de produto definidos.
-- Evoluir o score com dados reais, validacao estatistica e acompanhamento de performance.
-- Adicionar observabilidade, logs estruturados e tratamento mais detalhado de erros em producao.
+- Criar testes e2e cobrindo cadastro, verificação por console, login, conexão demo, score e solicitação de crédito.
+- Reintroduzir uma integração bancária real quando houver credenciais e escopo de produto definidos.
+- Evoluir o score com dados reais, validação estatística e acompanhamento de performance.
+- Adicionar observabilidade, logs estruturados e tratamento mais detalhado de erros em produção.
 
-Uma lista mais completa esta em [Melhorias Futuras](./future-improvements.md).
+Uma lista mais completa está em [Melhorias Futuras](./future-improvements.md).

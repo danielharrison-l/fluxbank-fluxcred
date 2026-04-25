@@ -1,6 +1,6 @@
 # FluxCred
 
-Aplicacao full-stack para fluxo de credito, com API NestJS, Prisma, PostgreSQL e frontend Vite/React.
+Aplicação full-stack para fluxo de crédito, com API NestJS, Prisma, PostgreSQL e frontend Vite/React.
 
 ## Requisitos
 
@@ -9,7 +9,7 @@ Aplicacao full-stack para fluxo de credito, com API NestJS, Prisma, PostgreSQL e
 - Docker e Docker Compose
 - PostgreSQL 16+
 
-## Variaveis de Ambiente
+## Variáveis de Ambiente
 
 Crie os arquivos locais a partir dos exemplos:
 
@@ -18,19 +18,18 @@ cp apps/api/.env.example apps/api/.env
 cp apps/www/.env.example apps/www/.env
 ```
 
-O arquivo `apps/api/.env` nao deve ser commitado.
+O arquivo `apps/api/.env` não deve ser commitado.
 
-## Documentacao da Solucao
+## Documentação
 
-- [Documento da Solucao](docs/solution.md)
+- [Documento da Solução](docs/solution.md)
+- [Infraestrutura e Deploy](docs/infrastructure.md)
 - [Diagrama de Arquitetura](docs/architecture-diagram.mmd)
 - [Melhorias Futuras](docs/future-improvements.md)
 
-O documento da solucao tambem descreve a infraestrutura usada para deploy: VPS na Hostinger, Dokploy autohospedado, Traefik como proxy reverso, DNS pela Cloudflare e envio de email com Resend.
+## API
 
-### API
-
-Variaveis principais:
+Variáveis principais:
 
 ```env
 PORT=3000
@@ -45,25 +44,25 @@ MAIL_FROM="FluxCred <no-reply@example.com>"
 
 Detalhes:
 
-- `PORT` e `HOST`: endereco em que a API sobe.
-- `CORS_ORIGIN`: origem do frontend autorizada a chamar a API. Aceita mais de uma origem separada por virgula.
-- `DATABASE_URL`: string de conexao do PostgreSQL usada pelo Prisma.
+- `PORT` e `HOST`: endereço em que a API sobe.
+- `CORS_ORIGIN`: origem do frontend autorizada a chamar a API. Aceita mais de uma origem separada por vírgula.
+- `DATABASE_URL`: string de conexão do PostgreSQL usada pelo Prisma.
 - `JWT_SECRET`: segredo para assinar tokens de acesso e refresh. Use um valor forte fora do ambiente local.
-- `APP_WEB_URL`: URL do frontend usada para montar links de verificacao de e-mail e reset de senha.
-- `MAIL_DELIVERY_MODE=console`: modo recomendado para desenvolvimento local. O backend nao envia e-mail real; ele imprime os links no terminal.
+- `APP_WEB_URL`: URL do frontend usada para montar links de verificação de e-mail e redefinição de senha.
+- `MAIL_DELIVERY_MODE=console`: modo recomendado para desenvolvimento local. O backend não envia e-mail real; ele imprime os links no terminal.
 - `MAIL_FROM`: remetente usado quando o envio real de e-mail estiver ativo.
 
-Variaveis opcionais:
+Variáveis opcionais:
 
-- `RESEND_API_KEY`: habilita envio real via Resend quando `MAIL_DELIVERY_MODE` nao for `console`.
+- `RESEND_API_KEY`: habilita envio real via Resend quando `MAIL_DELIVERY_MODE` não for `console`.
 - `ENABLE_API_DOCS=false`: desativa Swagger, OpenAPI JSON e Scalar.
-- `ENABLE_DEMO_CONNECTIONS=false`: desativa conexoes demo.
+- `ENABLE_DEMO_CONNECTIONS=false`: desativa conexões demo.
 
-Nao e necessario configurar integracao bancaria externa neste momento.
+Não é necessário configurar integração bancária externa neste momento.
 
-### Frontend
+## Frontend
 
-Variaveis principais:
+Variáveis principais:
 
 ```env
 PORT=3001
@@ -73,13 +72,13 @@ VITE_API_URL=http://localhost:3000
 
 Detalhes:
 
-- `PORT` e `HOST`: endereco do Vite em desenvolvimento ou preview.
+- `PORT` e `HOST`: endereço do Vite em desenvolvimento ou preview.
 - `VITE_API_URL`: URL base da API usada pelo frontend.
 - `E2E_APP_BASE_URL`: URL usada pelos testes Playwright.
 
 ## E-mail em Desenvolvimento
 
-Para testar cadastro, verificacao de e-mail e reset de senha sem conta na Resend, use:
+Para testar cadastro, verificação de e-mail e redefinição de senha sem conta na Resend, use:
 
 ```env
 MAIL_DELIVERY_MODE=console
@@ -93,7 +92,7 @@ Fluxo local:
 4. Abra o link no navegador.
 5. Depois disso, o login fica liberado.
 
-O mesmo vale para reset de senha: o link aparece no terminal como `Password reset link for ...`.
+O mesmo vale para redefinição de senha: o link aparece no terminal como `Password reset link for ...`.
 
 Para envio real de e-mail:
 
@@ -103,11 +102,11 @@ RESEND_API_KEY=re_...
 MAIL_FROM="FluxCred <no-reply@seudominio.com>"
 ```
 
-O dominio/remetente precisa estar validado na Resend.
+O domínio/remetente precisa estar validado na Resend.
 
 ## Rodando Localmente
 
-Instale dependencias:
+Instale as dependências:
 
 ```bash
 pnpm install
@@ -157,9 +156,9 @@ Frontend: http://localhost:3001
 
 ## Docker Compose
 
-O `docker-compose.yaml` sobe API e frontend, mas espera um banco PostgreSQL acessivel pela `DATABASE_URL`.
+O `docker-compose.yaml` sobe API e frontend, mas espera um banco PostgreSQL acessível pela `DATABASE_URL`.
 
-Com o banco ja rodando:
+Com o banco já rodando:
 
 ```bash
 docker compose up --build api
@@ -171,7 +170,7 @@ Para subir API e web:
 docker compose up --build api www
 ```
 
-Em producao:
+Em produção:
 
 ```bash
 docker compose -f docker-compose.prod.yaml up --build
@@ -179,7 +178,7 @@ docker compose -f docker-compose.prod.yaml up --build
 
 Se usar Docker para a API e o Postgres estiver no host, ajuste `DATABASE_URL` conforme o ambiente.
 
-## Documentacao da API
+## Documentação da API
 
 Com a API rodando:
 
@@ -189,21 +188,21 @@ OpenAPI JSON: http://localhost:3000/api-json
 Scalar:       http://localhost:3000/reference
 ```
 
-Use o botao de autenticacao Bearer/JWT e informe:
+Use o botão de autenticação Bearer/JWT e informe:
 
 ```text
 Bearer <accessToken>
 ```
 
-Para desativar a documentacao da API:
+Para desativar a documentação da API:
 
 ```env
 ENABLE_API_DOCS=false
 ```
 
-## Fluxo Basico de Teste
+## Fluxo Básico de Teste
 
-1. Criar usuario:
+1. Criar usuário:
 
 ```http
 POST /auth/register
@@ -219,22 +218,22 @@ POST /auth/login
 
 4. Usar o `accessToken` nas rotas privadas.
 
-5. Calcular metricas e score:
+5. Calcular métricas e score:
 
 ```http
 POST /financial-metrics/calculate
 POST /credit-score/calculate
 ```
 
-6. Solicitar credito:
+6. Solicitar crédito:
 
 ```http
 POST /credit-requests
 ```
 
-A solicitacao e aprovada ou recusada automaticamente com base no score e no limite recomendado.
+A solicitação é aprovada ou recusada automaticamente com base no score e no limite recomendado.
 
-## Comandos Uteis
+## Comandos Úteis
 
 ```bash
 pnpm --dir apps/api check

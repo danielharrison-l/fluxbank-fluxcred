@@ -1,15 +1,15 @@
 flowchart LR
-  User[Usuario] --> Web[Frontend React/Vite]
+  User[Usuário] --> Web[Frontend React/Vite]
   Web --> API[API NestJS]
-  API --> Auth[Modulo Auth]
-  API --> Demo[Modulo Demo]
-  API --> Metrics[Metricas Financeiras]
-  API --> Score[Score de Credito]
-  API --> Requests[Solicitacoes de Credito]
+  API --> Auth[Módulo Auth]
+  API --> Demo[Módulo Demo]
+  API --> Metrics[Métricas Financeiras]
+  API --> Score[Score de Crédito]
+  API --> Requests[Solicitações de Crédito]
   API --> DB[(PostgreSQL)]
   Auth --> DB
   Demo --> DB
   Metrics --> DB
   Score --> DB
   Requests --> DB
-  API --> Mail[Email: console local ou Resend]
+  API --> Mail[E-mail: console local ou Resend]
