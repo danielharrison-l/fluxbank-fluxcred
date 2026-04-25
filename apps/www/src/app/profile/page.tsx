@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   User,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiRequest, formatDate } from "@/lib/api";
@@ -133,7 +134,11 @@ function formatSyncDate(item: PluggyItem) {
 }
 
 function getItemStatusMeta(item: PluggyItem) {
-  if (item.errorMessage || item.status === "ERROR" || item.status === "LOGIN_ERROR") {
+  if (
+    item.errorMessage ||
+    item.status === "ERROR" ||
+    item.status === "LOGIN_ERROR"
+  ) {
     return {
       label: "Erro",
       className: "bg-red-50 text-red-700",
@@ -205,7 +210,7 @@ export default function ProfilePage() {
 
           <div className="mt-auto border-t border-slate-100 pt-5">
             <a
-              href="/dashboard"
+              href="/profile"
               className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
             >
               <Settings className="size-5" aria-hidden="true" />
@@ -260,7 +265,9 @@ export default function ProfilePage() {
                 <HelpCircle className="size-5" aria-hidden="true" />
               </button>
               <div className="flex size-9 items-center justify-center rounded-full bg-[#006d77] text-white">
-                <span className="text-xs font-bold">{getInitials(user?.name)}</span>
+                <span className="text-xs font-bold">
+                  {getInitials(user?.name)}
+                </span>
               </div>
             </div>
           </div>
@@ -285,7 +292,7 @@ export default function ProfilePage() {
                   </span>
                 </div>
                 <h1 className="font-mono text-2xl font-semibold text-[#181c1d]">
-                  {isLoading ? "Carregando..." : user?.name ?? "Usuário"}
+                  {isLoading ? "Carregando..." : (user?.name ?? "Usuário")}
                 </h1>
                 <p className="mt-1 text-sm text-[#506383]">
                   {user?.createdAt
@@ -320,7 +327,10 @@ export default function ProfilePage() {
                     Segurança da conta
                   </h2>
                   <div className="mt-4 flex items-center gap-3">
-                    <ShieldCheck className="size-5 text-emerald-300" aria-hidden="true" />
+                    <ShieldCheck
+                      className="size-5 text-emerald-300"
+                      aria-hidden="true"
+                    />
                     <span className="font-mono text-xl font-semibold">
                       Sessão protegida
                     </span>
@@ -349,31 +359,43 @@ export default function ProfilePage() {
 
                 <div className="grid gap-5 md:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
+                    <label
+                      htmlFor="profile-name"
+                      className="text-xs font-bold uppercase tracking-[0.12em] text-[#506383]"
+                    >
                       Nome completo
                     </label>
                     <Input
+                      id="profile-name"
                       readOnly
                       value={user?.name ?? "Não informado"}
                       className="h-12 rounded-xl border-slate-200 bg-slate-100 shadow-none"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
+                    <label
+                      htmlFor="profile-email"
+                      className="text-xs font-bold uppercase tracking-[0.12em] text-[#506383]"
+                    >
                       E-mail
                     </label>
                     <Input
+                      id="profile-email"
                       readOnly
                       value={user?.email ?? "Não informado"}
                       className="h-12 rounded-xl border-slate-200 bg-slate-100 shadow-none"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
+                    <label
+                      htmlFor="profile-document"
+                      className="text-xs font-bold uppercase tracking-[0.12em] text-[#506383]"
+                    >
                       Documento
                     </label>
                     <div className="relative">
                       <Input
+                        id="profile-document"
                         readOnly
                         value={maskDocument(user?.document)}
                         className="h-12 rounded-xl border-slate-200 bg-slate-100 pr-12 shadow-none"
@@ -384,10 +406,14 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
+                    <label
+                      htmlFor="profile-phone"
+                      className="text-xs font-bold uppercase tracking-[0.12em] text-[#506383]"
+                    >
                       Telefone
                     </label>
                     <Input
+                      id="profile-phone"
                       readOnly
                       value={formatPhone(user?.phone)}
                       className="h-12 rounded-xl border-slate-200 bg-slate-100 shadow-none"
@@ -399,23 +425,28 @@ export default function ProfilePage() {
               <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="mb-6 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <Link2 className="size-5 text-[#00766d]" aria-hidden="true" />
+                    <Link2
+                      className="size-5 text-[#00766d]"
+                      aria-hidden="true"
+                    />
                     <h2 className="font-mono text-xl font-semibold text-[#181c1d]">
                       Gerenciamento de dados conectados
                     </h2>
                   </div>
-                  <a
-                    href="/connect-accounts"
+                  <Link
+                    to="/connect-accounts"
                     className="text-sm font-semibold text-[#00766d] hover:underline"
                   >
                     Adicionar nova
-                  </a>
+                  </Link>
                 </div>
 
                 <div className="space-y-3">
                   {pluggyItems.map((item) => {
                     const statusMeta = getItemStatusMeta(item);
-                    const initials = getInitials(item.institutionName ?? "Banco");
+                    const initials = getInitials(
+                      item.institutionName ?? "Banco",
+                    );
 
                     return (
                       <article
@@ -442,12 +473,12 @@ export default function ProfilePage() {
                           >
                             {statusMeta.label}
                           </span>
-                          <a
-                            href="/connect-accounts"
+                          <Link
+                            to="/connect-accounts"
                             className="text-sm font-medium text-[#00766d] hover:underline"
                           >
                             Gerenciar
-                          </a>
+                          </Link>
                         </div>
                       </article>
                     );
@@ -462,7 +493,10 @@ export default function ProfilePage() {
               </section>
 
               <section className="flex items-start gap-4 rounded-xl border border-slate-200 bg-slate-100 p-5">
-                <ShieldCheck className="mt-1 size-7 shrink-0 text-[#00766d]" aria-hidden="true" />
+                <ShieldCheck
+                  className="mt-1 size-7 shrink-0 text-[#00766d]"
+                  aria-hidden="true"
+                />
                 <div>
                   <h2 className="font-semibold text-[#181c1d]">
                     Seus dados continuam sob seu controle

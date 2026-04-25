@@ -45,7 +45,12 @@ const navItems = [
 const bottomNavItems = [
   { label: "Home", href: "/dashboard", icon: Home, active: true },
   { label: "Atividade", href: "/transactions", icon: List },
-  { label: "Solicitar", href: "/credit-request", icon: CirclePlus, primary: true },
+  {
+    label: "Solicitar",
+    href: "/credit-request",
+    icon: CirclePlus,
+    primary: true,
+  },
   { label: "Análise", href: "/analysis", icon: BarChart3 },
   { label: "Perfil", href: "/profile", icon: User },
 ];
@@ -144,14 +149,14 @@ export default function DashboardPage() {
             <a href="/credit-request">Solicitar crédito</a>
           </Button>
           <a
-            href="/dashboard"
+            href="/profile"
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
           >
             <Settings className="size-5" aria-hidden="true" />
             Configurações
           </a>
-            <a
-              href="/logout"
+          <a
+            href="/logout"
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
           >
             <LogOut className="size-5" aria-hidden="true" />

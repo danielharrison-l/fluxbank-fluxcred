@@ -69,11 +69,7 @@ function decisionLabel(decision?: CreditDecision) {
     return "Aprovado";
   }
 
-  if (decision === "MANUAL_REVIEW") {
-    return "Em análise";
-  }
-
-  if (decision === "REJECTED") {
+  if (decision === "REJECTED" || decision === "MANUAL_REVIEW") {
     return "Negado";
   }
 
@@ -203,7 +199,7 @@ export default function CreditScorePage() {
 
         <div className="mt-auto space-y-3 border-t border-slate-100 pt-5">
           <a
-            href="/credit-score"
+            href="/profile"
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
           >
             <Settings className="size-5" aria-hidden="true" />
@@ -287,9 +283,6 @@ export default function CreditScorePage() {
                 <div className="mb-7 flex flex-wrap gap-3">
                   <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700">
                     {decisionLabel(score?.decision)}
-                  </span>
-                  <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-300">
-                    Em análise
                   </span>
                   <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-300">
                     Negado
@@ -447,7 +440,7 @@ export default function CreditScorePage() {
                       ? "/analysis"
                       : item.icon === BadgeCheck
                         ? "/credit-score"
-                : "/profile"
+                        : "/profile"
               }
               key={item.label}
               className={
@@ -467,4 +460,3 @@ export default function CreditScorePage() {
     </main>
   );
 }
-

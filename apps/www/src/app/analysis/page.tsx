@@ -19,7 +19,6 @@ import {
   ShieldCheck,
   TrendingUp,
   User,
-  WalletCards,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
@@ -144,10 +143,7 @@ export default function AnalysisPage() {
   const latestMetric = metrics[0] ?? null;
   const latestScore = data?.latestScore ?? null;
 
-  const chartMetrics = useMemo(
-    () => metrics.slice(0, 4).reverse(),
-    [metrics],
-  );
+  const chartMetrics = useMemo(() => metrics.slice(0, 4).reverse(), [metrics]);
 
   const chartMaxValue = useMemo(() => {
     if (!chartMetrics.length) {
@@ -231,7 +227,7 @@ export default function AnalysisPage() {
               <a href="/credit-request">Solicitar crédito</a>
             </Button>
             <a
-              href="/dashboard"
+              href="/profile"
               className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
             >
               <Settings className="size-5" aria-hidden="true" />
@@ -299,8 +295,8 @@ export default function AnalysisPage() {
               Análise financeira
             </h1>
             <p className="mt-2 max-w-2xl text-base leading-7 text-[#506383]">
-              Veja sua saúde financeira em um só lugar com receitas,
-              despesas, estabilidade e recomendação de crédito.
+              Veja sua saúde financeira em um só lugar com receitas, despesas,
+              estabilidade e recomendação de crédito.
             </p>
           </div>
 
@@ -324,10 +320,17 @@ export default function AnalysisPage() {
                   receita, despesa, frequência de renda e estabilidade.
                 </p>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <Button asChild className="h-12 rounded-xl bg-[#00766d] px-5 text-white hover:bg-[#005f58]">
+                  <Button
+                    asChild
+                    className="h-12 rounded-xl bg-[#00766d] px-5 text-white hover:bg-[#005f58]"
+                  >
                     <a href="/connect-accounts">Conectar contas</a>
                   </Button>
-                  <Button asChild variant="outline" className="h-12 rounded-xl border-slate-300 bg-white px-5 hover:bg-slate-50">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-12 rounded-xl border-slate-300 bg-white px-5 hover:bg-slate-50"
+                  >
                     <a href="/credit-score">Ver Score</a>
                   </Button>
                 </div>
@@ -464,7 +467,8 @@ export default function AnalysisPage() {
                       );
                       const expenseHeight = Math.max(
                         18,
-                        (Number(metric.totalExpense ?? 0) / chartMaxValue) * 180,
+                        (Number(metric.totalExpense ?? 0) / chartMaxValue) *
+                          180,
                       );
 
                       return (
@@ -518,8 +522,8 @@ export default function AnalysisPage() {
                     </div>
                     <p className="mt-4 text-sm leading-7 text-[#506383]">
                       Seus depósitos mostram um padrão de{" "}
-                      {stability.badge.toLowerCase()}, o que ajuda na leitura
-                      de risco e na recomendação de limite.
+                      {stability.badge.toLowerCase()}, o que ajuda na leitura de
+                      risco e na recomendação de limite.
                     </p>
                   </article>
 
