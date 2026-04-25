@@ -27,6 +27,11 @@ RUN pnpm turbo build --filter=api
 
 # Prune to runtime-only (dist + prod deps)
 RUN pnpm -F api deploy --prod /out
+RUN set -eux; \
+  prisma_source="$(find /loci/node_modules/.pnpm -type d -path '*/node_modules/.prisma' | head -n 1)"; \
+  prisma_client_dir="$(find /out/node_modules/.pnpm -type d -path '*/node_modules/@prisma/client' | head -n 1)"; \
+  prisma_node_modules_dir="$(dirname "$(dirname "$prisma_client_dir")")"; \
+  cp -R "$prisma_source" "$prisma_node_modules_dir/.prisma"
 
 
 
