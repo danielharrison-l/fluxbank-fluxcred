@@ -1,24 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 const navigationLinks = [
-  { name: "Problem", hash: "#problem" },
-  { name: "Features", hash: "#features" },
-  { name: "Open Source", hash: "#open-source" },
-];
-
-const externalLinks = [
-  { label: "View on GitHub", href: "https://github.com/emiliosheinz/loci" },
-  { label: "Documentation", href: "https://github.com/emiliosheinz/loci" },
-  {
-    label: "Roadmap",
-    href: "https://github.com/users/emiliosheinz/projects/3",
-  },
-  { label: "Changelog", href: "https://github.com/emiliosheinz/loci/releases" },
-  { label: "Wiki", href: "https://github.com/emiliosheinz/loci/wiki" },
-  {
-    label: "Contribute on GitHub",
-    href: "https://github.com/emiliosheinz/loci?tab=contributing-ov-file#contributing-to-loci",
-  },
+  { name: "Desafio", hash: "#problem" },
+  { name: "Recursos", hash: "#features" },
+  { name: "Tecnologia", hash: "#open-source" },
 ];
 
 test.describe("Home Page", () => {
@@ -28,7 +13,9 @@ test.describe("Home Page", () => {
     await test.step("renders header and hero", async () => {
       await expect(page.locator("header")).toBeVisible();
       await expect(
-        page.getByRole("heading", { name: "Capture anything, in any moment" }),
+        page.getByRole("heading", {
+          name: /Cr.*dito mais justo para quem trabalha/,
+        }),
       ).toBeVisible();
     });
 
@@ -91,22 +78,8 @@ test.describe("Home Page", () => {
     }
   });
 
-  test.describe("External navigation", () => {
-    for (const link of externalLinks) {
-      test(`has correct href for ${link.label}`, async ({ page }) => {
-        await page.goto("/");
-        const externalLink = page.getByRole("link", { name: link.label });
-        await expect(externalLink).toHaveAttribute("href", link.href);
-      });
-    }
-
-    test("has correct href for footer GitHub icon link", async ({ page }) => {
-      await page.goto("/");
-      const footerGitHubLink = page.getByRole("link", { name: "GitHub" });
-      await expect(footerGitHubLink.first()).toHaveAttribute(
-        "href",
-        "https://github.com/emiliosheinz/loci",
-      );
-    });
+  test("does not render the footer link section", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "Links" })).toHaveCount(0);
   });
 });

@@ -8,7 +8,9 @@ const config: Config = {
   testPathIgnorePatterns: [
     ...(baseConfig.testPathIgnorePatterns ?? []),
     "/e2e-tests/",
+    "/.next/",
   ],
+  modulePathIgnorePatterns: ["<rootDir>/.next/"],
 };
 
 export default config;
