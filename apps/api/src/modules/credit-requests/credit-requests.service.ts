@@ -6,7 +6,6 @@ import {
 import { CreditRequestStatus } from "@prisma/client";
 import { PrismaService } from "@/infra/database/prisma.service";
 import { CreateCreditRequestDto } from "./dto/create-credit-request.dto";
-import { DecideCreditRequestDto } from "./dto/decide-credit-request.dto";
 
 const CREDIT_REQUEST_COOLDOWN_MONTHS = 2;
 
@@ -94,25 +93,6 @@ export class CreditRequestsService {
     });
 
     return this.withDecisionDetails(creditRequest);
-  }
-
-  async decide(userId: string, id: string, data: DecideCreditRequestDto) {
-    const creditRequest = await this.prisma.creditRequest.findFirst({
-      where: { id, userId },
-    });
-
-    if (!creditRequest) {
-      throw new NotFoundException("Credit request not found");
-    }
-
-    return this.prisma.creditRequest.update({
-      where: { id },
-      data: {
-        status: data.status,
-        approvedAmount: data.approvedAmount,
-        decidedAt: new Date(),
-      },
-    });
   }
 
   private calculateStatus(

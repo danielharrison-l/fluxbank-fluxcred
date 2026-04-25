@@ -32,16 +32,11 @@ type AuthenticatedUser = {
 
 @Injectable()
 export class AuthService {
-  private readonly accessTokenTtl =
-    process.env.ACCESS_TOKEN_TTL?.trim() || "15m";
-  private readonly refreshTokenTtl =
-    process.env.REFRESH_TOKEN_TTL?.trim() || "7d";
-  private readonly emailVerificationTtl =
-    process.env.EMAIL_VERIFICATION_TTL?.trim() || "24h";
-  private readonly passwordResetTtl =
-    process.env.PASSWORD_RESET_TTL?.trim() || "1h";
+  private readonly accessTokenTtl = "15m";
+  private readonly refreshTokenTtl = "7d";
+  private readonly emailVerificationTtl = "24h";
+  private readonly passwordResetTtl = "1h";
   private readonly refreshTokenSecret =
-    process.env.JWT_REFRESH_SECRET?.trim() ||
     process.env.JWT_SECRET ||
     (() => {
       throw new Error("JWT_SECRET must be defined in environment variables");
@@ -304,25 +299,18 @@ export class AuthService {
   }
 
   getRefreshCookieName() {
-    return process.env.REFRESH_TOKEN_COOKIE_NAME?.trim() || "fluxcred_refresh";
+    return "fluxcred_refresh";
   }
 
   getRefreshCookieOptions() {
     const maxAge = this.parseDurationToMs(this.refreshTokenTtl);
-    const domain = process.env.AUTH_COOKIE_DOMAIN?.trim();
-    const sameSite = (process.env.AUTH_COOKIE_SAME_SITE?.trim().toLowerCase() ||
-      "lax") as "lax" | "strict" | "none";
-    const secure =
-      (process.env.AUTH_COOKIE_SECURE?.trim().toLowerCase() || "") === "true" ||
-      process.env.NODE_ENV === "production";
 
     return {
       httpOnly: true,
-      secure,
-      sameSite,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       path: "/auth",
       maxAge,
-      ...(domain ? { domain } : {}),
     } as const;
   }
 
@@ -399,9 +387,7 @@ export class AuthService {
     const match = normalizedValue.match(/^(\d+)(ms|s|m|h|d)$/);
 
     if (!match) {
-      throw new Error(
-        "ACCESS_TOKEN_TTL and REFRESH_TOKEN_TTL must use ms, s, m, h or d",
-      );
+      throw new Error("Token durations must use ms, s, m, h or d");
     }
 
     const amount = Number(match[1]);

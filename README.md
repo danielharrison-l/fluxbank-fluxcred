@@ -1,6 +1,6 @@
 # FluxCred
 
-Backend NestJS com Prisma, PostgreSQL e integracao Pluggy.
+Aplicacao full-stack para fluxo de credito, com API NestJS, Prisma, PostgreSQL e frontend Vite/React.
 
 ## Requisitos
 
@@ -9,33 +9,95 @@ Backend NestJS com Prisma, PostgreSQL e integracao Pluggy.
 - Docker e Docker Compose
 - PostgreSQL 16+
 
-## Variaveis de ambiente
+## Variaveis de Ambiente
 
-Crie o arquivo da API:
+Crie os arquivos locais a partir dos exemplos:
 
 ```bash
 cp apps/api/.env.example apps/api/.env
+cp apps/www/.env.example apps/www/.env
 ```
 
-Configure:
+O arquivo `apps/api/.env` nao deve ser commitado.
+
+### API
+
+Variaveis principais:
 
 ```env
 PORT=3000
 HOST=0.0.0.0
+CORS_ORIGIN=http://localhost:3001
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fluxcred?schema=public"
 JWT_SECRET="change-me"
-PLUGGY_CLIENT_ID=""
-PLUGGY_CLIENT_SECRET=""
-PLUGGY_BASE_URL="https://api.pluggy.ai"
+APP_WEB_URL=http://localhost:3001
+MAIL_DELIVERY_MODE=console
+MAIL_FROM="FluxCred <no-reply@example.com>"
 ```
 
-Para o frontend, se for usar:
+Detalhes:
 
-```bash
-cp apps/www/.env.example apps/www/.env
+- `PORT` e `HOST`: endereco em que a API sobe.
+- `CORS_ORIGIN`: origem do frontend autorizada a chamar a API. Aceita mais de uma origem separada por virgula.
+- `DATABASE_URL`: string de conexao do PostgreSQL usada pelo Prisma.
+- `JWT_SECRET`: segredo para assinar tokens de acesso e refresh. Use um valor forte fora do ambiente local.
+- `APP_WEB_URL`: URL do frontend usada para montar links de verificacao de e-mail e reset de senha.
+- `MAIL_DELIVERY_MODE=console`: modo recomendado para desenvolvimento local. O backend nao envia e-mail real; ele imprime os links no terminal.
+- `MAIL_FROM`: remetente usado quando o envio real de e-mail estiver ativo.
+
+Variaveis opcionais:
+
+- `RESEND_API_KEY`: habilita envio real via Resend quando `MAIL_DELIVERY_MODE` nao for `console`.
+- `ENABLE_API_DOCS=false`: desativa Swagger, OpenAPI JSON e Scalar.
+- `ENABLE_DEMO_CONNECTIONS=false`: desativa conexoes demo.
+
+Nao e necessario configurar variaveis da Pluggy neste momento.
+
+### Frontend
+
+Variaveis principais:
+
+```env
+PORT=3001
+HOST=0.0.0.0
+VITE_API_URL=http://localhost:3000
 ```
 
-## Rodando localmente
+Detalhes:
+
+- `PORT` e `HOST`: endereco do Vite em desenvolvimento ou preview.
+- `VITE_API_URL`: URL base da API usada pelo frontend.
+- `E2E_APP_BASE_URL`: URL usada pelos testes Playwright.
+
+## E-mail em Desenvolvimento
+
+Para testar cadastro, verificacao de e-mail e reset de senha sem conta na Resend, use:
+
+```env
+MAIL_DELIVERY_MODE=console
+```
+
+Fluxo local:
+
+1. Crie uma conta pelo frontend.
+2. Veja o terminal da API.
+3. Copie o link impresso, por exemplo `Email verification link for ...`.
+4. Abra o link no navegador.
+5. Depois disso, o login fica liberado.
+
+O mesmo vale para reset de senha: o link aparece no terminal como `Password reset link for ...`.
+
+Para envio real de e-mail:
+
+```env
+MAIL_DELIVERY_MODE=resend
+RESEND_API_KEY=re_...
+MAIL_FROM="FluxCred <no-reply@seudominio.com>"
+```
+
+O dominio/remetente precisa estar validado na Resend.
+
+## Rodando Localmente
 
 Instale dependencias:
 
@@ -72,17 +134,24 @@ Inicie a API:
 pnpm start:dev
 ```
 
-API:
+Inicie o frontend em outro terminal:
 
-```text
-http://localhost:3000
+```bash
+pnpm --dir apps/www start:dev
 ```
 
-## Rodando com Docker Compose
+URLs locais:
 
-O `docker-compose.yaml` sobe os servicos da aplicacao, mas espera um banco PostgreSQL acessivel pela `DATABASE_URL`.
+```text
+API:      http://localhost:3000
+Frontend: http://localhost:3001
+```
 
-Com o banco ja rodando, execute:
+## Docker Compose
+
+O `docker-compose.yaml` sobe API e frontend, mas espera um banco PostgreSQL acessivel pela `DATABASE_URL`.
+
+Com o banco ja rodando:
 
 ```bash
 docker compose up --build api
@@ -100,6 +169,8 @@ Em producao:
 docker compose -f docker-compose.prod.yaml up --build
 ```
 
+Se usar Docker para a API e o Postgres estiver no host, ajuste `DATABASE_URL` conforme o ambiente.
+
 ## Documentacao da API
 
 Com a API rodando:
@@ -116,7 +187,13 @@ Use o botao de autenticacao Bearer/JWT e informe:
 Bearer <accessToken>
 ```
 
-## Fluxo basico de teste
+Para desativar a documentacao da API:
+
+```env
+ENABLE_API_DOCS=false
+```
+
+## Fluxo Basico de Teste
 
 1. Criar usuario:
 
@@ -124,57 +201,38 @@ Bearer <accessToken>
 POST /auth/register
 ```
 
-2. Login:
+2. Confirmar o e-mail usando o link impresso no terminal da API.
+
+3. Login:
 
 ```http
 POST /auth/login
 ```
 
-3. Usar o `accessToken` nas rotas privadas.
+4. Usar o `accessToken` nas rotas privadas.
 
-4. Gerar token Pluggy:
-
-```http
-POST /pluggy/connect-token
-```
-
-5. Salvar item conectado:
-
-```http
-POST /pluggy/items
-```
-
-6. Sincronizar contas e transacoes:
-
-```http
-POST /pluggy/sync/:itemId/accounts
-POST /pluggy/sync/:itemId/transactions
-```
-
-7. Calcular metricas e score:
+5. Calcular metricas e score:
 
 ```http
 POST /financial-metrics/calculate
 POST /credit-score/calculate
 ```
 
-8. Solicitar credito:
+6. Solicitar credito:
 
 ```http
 POST /credit-requests
 ```
 
-## Comandos uteis
+A solicitacao e aprovada ou recusada automaticamente com base no score e no limite recomendado.
+
+## Comandos Uteis
 
 ```bash
 pnpm --dir apps/api check
 pnpm --dir apps/api build
+pnpm --dir apps/www check
+pnpm --dir apps/www build
 pnpm prisma generate
 pnpm prisma migrate dev
 ```
-
-## Observacoes
-
-- O arquivo `apps/api/.env` nao deve ser commitado.
-- Use credenciais sandbox/demo da Pluggy em desenvolvimento.
-- Se usar Docker para a API e o Postgres estiver no host, ajuste `DATABASE_URL` conforme o ambiente.

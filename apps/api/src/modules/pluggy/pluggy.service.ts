@@ -97,7 +97,7 @@ export class PluggyService {
 
   constructor(private readonly prisma: PrismaService) {
     this.http = axios.create({
-      baseURL: process.env.PLUGGY_BASE_URL ?? "https://api.pluggy.ai",
+      baseURL: "https://api.pluggy.ai",
       timeout: 30000,
     });
   }

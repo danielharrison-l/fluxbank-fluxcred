@@ -1,5 +1,11 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import Home from "./app/page";
 import { ensureAuthenticatedSession } from "./lib/api";
 import { getStoredAccessToken } from "./lib/auth";
@@ -60,19 +66,153 @@ function useSessionState() {
   return state;
 }
 
+const protectedRoutePrefixes = [
+  "/dashboard",
+  "/analysis",
+  "/accounts",
+  "/transactions",
+  "/connect-accounts",
+  "/credit-score",
+  "/credit-request",
+  "/profile",
+];
+
+const navSkeletonItems = [
+  { id: "dashboard", width: "w-44" },
+  { id: "transactions", width: "w-40" },
+  { id: "analysis", width: "w-36" },
+  { id: "credit-score", width: "w-48" },
+  { id: "credit-request", width: "w-44" },
+  { id: "connect-accounts", width: "w-36" },
+];
+
+function SkeletonBlock({ className }: { className: string }) {
+  return (
+    <div className={`animate-pulse rounded-lg bg-slate-200 ${className}`} />
+  );
+}
+
 function SessionLoadingScreen() {
   return (
-    <main className="flex min-h-svh items-center justify-center bg-[#f7fafa] px-6 text-center text-sm text-slate-500">
-      Restaurando sua sessão...
+    <main
+      className="grid min-h-svh place-items-center bg-[#f7fafa] px-6"
+      aria-label="Restaurando sessão"
+    >
+      <div className="h-2 w-36 overflow-hidden rounded-full bg-slate-200">
+        <div className="h-full w-16 animate-pulse rounded-full bg-[#00766d]" />
+      </div>
+    </main>
+  );
+}
+
+function ProtectedRouteLoadingScreen() {
+  return (
+    <main
+      className="min-h-svh bg-[#f7fafa] text-[#102a43]"
+      aria-label="Carregando página"
+    >
+      <aside className="fixed left-0 top-0 z-50 hidden h-svh w-72 flex-col border-r border-slate-200 bg-white p-6 md:flex">
+        <div className="mb-8">
+          <SkeletonBlock className="h-8 w-32" />
+          <SkeletonBlock className="mt-2 h-3 w-28" />
+        </div>
+
+        <nav className="flex-1 space-y-3">
+          {navSkeletonItems.map((item) => (
+            <div className="flex items-center gap-3 px-4 py-3" key={item.id}>
+              <SkeletonBlock className="size-5 rounded-md" />
+              <SkeletonBlock className={`h-4 ${item.width}`} />
+            </div>
+          ))}
+        </nav>
+
+        <div className="space-y-3 border-t border-slate-100 pt-5">
+          <SkeletonBlock className="h-12 w-full rounded-xl" />
+          <SkeletonBlock className="h-10 w-40" />
+          <SkeletonBlock className="h-10 w-28" />
+        </div>
+      </aside>
+
+      <section className="min-h-svh pb-28 md:ml-72 md:pb-8">
+        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/85 shadow-sm backdrop-blur">
+          <div className="flex h-16 items-center justify-between px-5 md:px-8">
+            <SkeletonBlock className="h-6 w-28" />
+            <div className="flex items-center gap-3">
+              <SkeletonBlock className="hidden h-10 w-56 rounded-xl sm:block" />
+              <SkeletonBlock className="size-10 rounded-full" />
+            </div>
+          </div>
+        </header>
+
+        <div className="space-y-6 px-5 py-6 md:px-8">
+          <div className="grid gap-4 lg:grid-cols-4">
+            <SkeletonBlock className="h-32" />
+            <SkeletonBlock className="h-32" />
+            <SkeletonBlock className="h-32" />
+            <SkeletonBlock className="h-32" />
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+            <SkeletonBlock className="h-80" />
+            <SkeletonBlock className="h-80" />
+          </div>
+
+          <SkeletonBlock className="h-64" />
+        </div>
+      </section>
+
+      <nav className="fixed inset-x-0 bottom-0 z-50 grid h-20 grid-cols-5 border-t border-slate-200 bg-white px-3 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] md:hidden">
+        {[0, 1, 2, 3, 4].map((item) => (
+          <div className="flex items-center justify-center" key={item}>
+            <SkeletonBlock className="size-9 rounded-full" />
+          </div>
+        ))}
+      </nav>
+    </main>
+  );
+}
+
+function PublicRouteLoadingScreen() {
+  return (
+    <main
+      className="min-h-svh bg-[#f7fafa] px-5 py-5"
+      aria-label="Carregando página"
+    >
+      <header className="mx-auto flex h-14 max-w-6xl items-center justify-between">
+        <SkeletonBlock className="h-8 w-32" />
+        <div className="hidden items-center gap-3 sm:flex">
+          <SkeletonBlock className="h-9 w-20" />
+          <SkeletonBlock className="h-9 w-28" />
+        </div>
+      </header>
+
+      <section className="mx-auto grid min-h-[calc(100svh-5.5rem)] max-w-6xl items-center gap-8 py-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="space-y-5">
+          <SkeletonBlock className="h-12 w-full max-w-lg" />
+          <SkeletonBlock className="h-12 w-10/12 max-w-md" />
+          <SkeletonBlock className="h-5 w-full max-w-xl" />
+          <SkeletonBlock className="h-5 w-9/12 max-w-lg" />
+          <div className="flex gap-3 pt-3">
+            <SkeletonBlock className="h-11 w-32" />
+            <SkeletonBlock className="h-11 w-28" />
+          </div>
+        </div>
+        <SkeletonBlock className="h-[26rem] w-full" />
+      </section>
     </main>
   );
 }
 
 function RouteLoadingScreen() {
-  return (
-    <main className="flex min-h-svh items-center justify-center bg-[#f7fafa] px-6 text-center text-sm text-slate-500">
-      Carregando...
-    </main>
+  const location = useLocation();
+  const isProtectedRoute = protectedRoutePrefixes.some((prefix) =>
+    location.pathname.startsWith(prefix),
+  );
+
+  return isProtectedRoute ? (
+    <ProtectedRouteLoadingScreen />
+  ) : (
+    <PublicRouteLoadingScreen />
   );
 }
 

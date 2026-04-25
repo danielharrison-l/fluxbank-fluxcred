@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
   Post,
   Req,
   UseGuards,
@@ -15,11 +14,9 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import type { Request } from "express";
-import { AdminApiKeyGuard } from "@/modules/auth/guards/admin-api-key.guard";
 import { JwtAuthGuard } from "@/modules/auth/guards/jwt-auth.guard";
 import { CreditRequestsService } from "./credit-requests.service";
 import { CreateCreditRequestDto } from "./dto/create-credit-request.dto";
-import { DecideCreditRequestDto } from "./dto/decide-credit-request.dto";
 
 type AuthenticatedRequest = Request & { user: { id: string } };
 
@@ -53,17 +50,5 @@ export class CreditRequestsController {
     @Body() data: CreateCreditRequestDto,
   ) {
     return this.creditRequestsService.create(request.user.id, data);
-  }
-
-  @Patch(":id/decision")
-  @UseGuards(JwtAuthGuard, AdminApiKeyGuard)
-  @ApiOperation({ summary: "Update credit request decision" })
-  @ApiResponse({ status: 200, description: "Credit request updated" })
-  decide(
-    @Req() request: AuthenticatedRequest,
-    @Param("id") id: string,
-    @Body() data: DecideCreditRequestDto,
-  ) {
-    return this.creditRequestsService.decide(request.user.id, id, data);
   }
 }
