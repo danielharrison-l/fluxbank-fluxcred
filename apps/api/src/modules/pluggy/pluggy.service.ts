@@ -1,6 +1,7 @@
 import {
   BadGatewayException,
   BadRequestException,
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -201,8 +202,18 @@ export class PluggyService {
   }
 
   async getTransactions(accountId: string) {
-    const data = await this.getTransactionsPage(accountId, 1);
-    return data.results ?? [];
+    const transactions: PluggyTransactionResponse[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    do {
+      const data = await this.getTransactionsPage(accountId, page);
+      transactions.push(...(data.results ?? []));
+      totalPages = data.totalPages ?? page;
+      page += 1;
+    } while (page <= totalPages);
+
+    return transactions;
   }
 
   async getTransactionsPage(accountId: string, page: number) {
@@ -229,6 +240,13 @@ export class PluggyService {
   async saveItem(userId: string, itemId: string) {
     try {
       const item = await this.getItem(itemId);
+      const existingItem = await this.prisma.pluggyItem.findUnique({
+        where: { pluggyItemId: item.id },
+      });
+
+      if (existingItem && existingItem.userId !== userId) {
+        throw new ConflictException("Pluggy item already belongs to a user");
+      }
 
       return this.prisma.pluggyItem.upsert({
         where: { pluggyItemId: item.id },
@@ -307,6 +325,7 @@ export class PluggyService {
       const syncedAccounts = [];
 
       for (const account of accounts) {
+        await this.assertAccountOwnership(userId, account.id);
         const syncedAccount = await this.prisma.financialAccount.upsert({
           where: { pluggyAccountId: account.id },
           update: this.mapAccountUpdate(account),
@@ -381,6 +400,7 @@ export class PluggyService {
           const transactions = response.results ?? [];
 
           for (const transaction of transactions) {
+            await this.assertTransactionOwnership(userId, transaction.id);
             await this.prisma.transaction.upsert({
               where: { pluggyTransactionId: transaction.id },
               update: this.mapTransactionUpdate(transaction),
@@ -453,6 +473,7 @@ export class PluggyService {
       const accounts = await this.getAccounts(itemId);
 
       for (const account of accounts) {
+        await this.assertAccountOwnership(userId, account.id);
         const savedAccount = await this.prisma.financialAccount.upsert({
           where: { pluggyAccountId: account.id },
           update: this.mapAccountUpdate(account),
@@ -469,6 +490,7 @@ export class PluggyService {
         const transactions = await this.getTransactions(account.id);
 
         for (const transaction of transactions) {
+          await this.assertTransactionOwnership(userId, transaction.id);
           await this.prisma.transaction.upsert({
             where: { pluggyTransactionId: transaction.id },
             update: this.mapTransactionUpdate(transaction),
@@ -520,6 +542,36 @@ export class PluggyService {
     return { "X-API-KEY": token };
   }
 
+  private async assertAccountOwnership(
+    userId: string,
+    pluggyAccountId: string,
+  ) {
+    const account = await this.prisma.financialAccount.findUnique({
+      where: { pluggyAccountId },
+      select: { userId: true },
+    });
+
+    if (account && account.userId !== userId) {
+      throw new ConflictException("Pluggy account already belongs to a user");
+    }
+  }
+
+  private async assertTransactionOwnership(
+    userId: string,
+    pluggyTransactionId: string,
+  ) {
+    const transaction = await this.prisma.transaction.findUnique({
+      where: { pluggyTransactionId },
+      select: { userId: true },
+    });
+
+    if (transaction && transaction.userId !== userId) {
+      throw new ConflictException(
+        "Pluggy transaction already belongs to a user",
+      );
+    }
+  }
+
   private mapPluggyError(error: unknown, fallbackMessage: string) {
     return this.toHttpException(
       this.toPluggyMappedError(error, fallbackMessage),
@@ -560,6 +612,7 @@ export class PluggyService {
     if (
       error instanceof UnauthorizedException ||
       error instanceof BadRequestException ||
+      error instanceof ConflictException ||
       error instanceof ServiceUnavailableException ||
       error instanceof BadGatewayException ||
       error instanceof InternalServerErrorException
