@@ -54,9 +54,9 @@ export default function ResetPasswordPage() {
         body: JSON.stringify({ token, password }),
       });
 
-      const data = await parseJsonResponse<{ message?: string }>(response).catch(
-        () => null,
-      );
+      const data = await parseJsonResponse<{ message?: string }>(
+        response,
+      ).catch(() => null);
 
       if (!response.ok) {
         throw new Error(data?.message ?? "Não foi possível redefinir a senha.");
@@ -134,7 +134,10 @@ export default function ResetPasswordPage() {
         </form>
 
         <div className="mt-6 text-center text-sm text-[#506383]">
-          <Link to="/login" className="font-semibold text-[#00766d] hover:underline">
+          <Link
+            to="/login"
+            className="font-semibold text-[#00766d] hover:underline"
+          >
             Voltar para o login
           </Link>
         </div>

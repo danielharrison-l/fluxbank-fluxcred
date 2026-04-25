@@ -243,6 +243,7 @@ export function LoginForm({
           ) : (
             <label className="flex items-start gap-3 rounded-lg border border-[#d8e6e7] bg-[#f0fbfa] p-3 text-sm leading-6 text-[#3e494a]">
               <input
+                required
                 type="checkbox"
                 className="mt-1 size-4 rounded border-[#9fb3b5] text-primary focus:ring-primary"
               />

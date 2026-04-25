@@ -23,13 +23,15 @@ export default function ForgotPasswordPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: String(formData.get("email") ?? "").trim().toLowerCase(),
+          email: String(formData.get("email") ?? "")
+            .trim()
+            .toLowerCase(),
         }),
       });
 
-      const data = await parseJsonResponse<{ message?: string }>(response).catch(
-        () => null,
-      );
+      const data = await parseJsonResponse<{ message?: string }>(
+        response,
+      ).catch(() => null);
 
       if (!response.ok) {
         throw new Error(data?.message ?? "Não foi possível solicitar o reset.");
@@ -95,7 +97,10 @@ export default function ForgotPasswordPage() {
         </form>
 
         <div className="mt-6 text-center text-sm text-[#506383]">
-          <Link to="/login" className="font-semibold text-[#00766d] hover:underline">
+          <Link
+            to="/login"
+            className="font-semibold text-[#00766d] hover:underline"
+          >
             Voltar para o login
           </Link>
         </div>

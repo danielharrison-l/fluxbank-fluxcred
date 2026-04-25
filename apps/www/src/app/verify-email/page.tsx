@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ export default function VerifyEmailPage() {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function mapVerificationError(message: string) {
+  const mapVerificationError = useCallback((message: string) => {
     if (message === "Invalid verification token") {
       return "O link de confirmação é inválido.";
     }
@@ -30,7 +30,7 @@ export default function VerifyEmailPage() {
     }
 
     return message;
-  }
+  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -47,12 +47,14 @@ export default function VerifyEmailPage() {
           body: JSON.stringify({ token }),
         });
 
-        const data = await parseJsonResponse<{ message?: string }>(response).catch(
-          () => null,
-        );
+        const data = await parseJsonResponse<{ message?: string }>(
+          response,
+        ).catch(() => null);
 
         if (!response.ok) {
-          throw new Error(data?.message ?? "Não foi possível confirmar o e-mail.");
+          throw new Error(
+            data?.message ?? "Não foi possível confirmar o e-mail.",
+          );
         }
 
         if (!isMounted) {
@@ -83,7 +85,7 @@ export default function VerifyEmailPage() {
     return () => {
       isMounted = false;
     };
-  }, [token]);
+  }, [mapVerificationError, token]);
 
   async function handleResend(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -98,14 +100,16 @@ export default function VerifyEmailPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: String(formData.get("email") ?? "").trim().toLowerCase(),
+            email: String(formData.get("email") ?? "")
+              .trim()
+              .toLowerCase(),
           }),
         },
       );
 
-      const data = await parseJsonResponse<{ message?: string }>(response).catch(
-        () => null,
-      );
+      const data = await parseJsonResponse<{ message?: string }>(
+        response,
+      ).catch(() => null);
 
       if (!response.ok) {
         throw new Error(data?.message ?? "Não foi possível reenviar o e-mail.");
@@ -182,7 +186,10 @@ export default function VerifyEmailPage() {
         )}
 
         <div className="mt-6 text-center text-sm text-[#506383]">
-          <Link to="/login" className="font-semibold text-[#00766d] hover:underline">
+          <Link
+            to="/login"
+            className="font-semibold text-[#00766d] hover:underline"
+          >
             Ir para o login
           </Link>
         </div>
