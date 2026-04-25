@@ -35,7 +35,7 @@ const navItems = [
     icon: LayoutDashboard,
     active: true,
   },
-  { label: "Transações", href: "/dashboard", icon: ReceiptText },
+  { label: "Transações", href: "/transactions", icon: ReceiptText },
   { label: "Análise", href: "/dashboard", icon: BarChart3 },
   { label: "Score de Crédito", href: "/credit-score", icon: Gauge },
   { label: "Solicitar Crédito", href: "/credit-request", icon: CreditCard },
@@ -476,12 +476,12 @@ export default function DashboardPage() {
                   </table>
                 </div>
                 <div className="border-t border-slate-100 p-4 text-center">
-                  <button
-                    type="button"
+                  <a
+                    href="/transactions"
                     className="text-xs font-bold text-[#506383] transition-colors hover:text-[#00766d]"
                   >
                     Ver extrato completo
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>

@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import AccountsPage from "./app/accounts/page";
 import ConnectAccountsPage from "./app/connect-accounts/page";
 import CreditRequestPage from "./app/credit-request/page";
 import CreditScorePage from "./app/credit-score/page";
@@ -6,6 +7,7 @@ import DashboardPage from "./app/dashboard/page";
 import Home from "./app/page";
 import LoginPage from "./app/login/page";
 import RegisterPage from "./app/register/page";
+import TransactionsPage from "./app/transactions/page";
 
 const authTokenKeys = ["accessToken", "token", "fluxcred.accessToken"];
 
@@ -73,6 +75,22 @@ export function App() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/accounts"
+        element={
+          <ProtectedRoute>
+            <AccountsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/transactions"
+        element={
+          <ProtectedRoute>
+            <TransactionsPage />
           </ProtectedRoute>
         }
       />

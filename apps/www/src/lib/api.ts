@@ -1,4 +1,19 @@
-const configuredApiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
+declare global {
+  interface Window {
+    __APP_CONFIG__?: {
+      VITE_API_URL?: string;
+    };
+  }
+}
+
+function getConfiguredApiBaseUrl() {
+  const runtimeValue =
+    typeof window !== "undefined" ? window.__APP_CONFIG__?.VITE_API_URL : undefined;
+  const buildValue = import.meta.env.VITE_API_URL;
+  const resolvedValue = runtimeValue || buildValue;
+
+  return resolvedValue?.replace(/\/$/, "");
+}
 
 function isLoopbackOrPrivateHost(hostname: string) {
   if (
@@ -30,6 +45,8 @@ function isLocalDevelopmentHost(hostname: string) {
 }
 
 export function getApiBaseUrl() {
+  const configuredApiBaseUrl = getConfiguredApiBaseUrl();
+
   if (typeof window === "undefined") {
     return configuredApiBaseUrl ?? "";
   }

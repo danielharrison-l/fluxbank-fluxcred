@@ -32,7 +32,11 @@ RUN apk add --no-cache curl nginx
 
 COPY --from=builder /loci/apps/www/dist /usr/share/nginx/html
 COPY apps/www/nginx.conf /etc/nginx/http.d/default.conf
+COPY apps/www/docker-entrypoint.sh /docker-entrypoint.sh
 
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
 
 
