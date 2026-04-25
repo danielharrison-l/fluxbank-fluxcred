@@ -4,6 +4,7 @@ import {
   Bell,
   Building2,
   CheckCircle2,
+  CreditCard,
   CircleDollarSign,
   Clock3,
   Gauge,
