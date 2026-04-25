@@ -174,7 +174,19 @@ export default function CreditScorePage() {
 
             return (
               <a
-                href={item.active ? "/credit-score" : "/dashboard"}
+                href={
+                  item.icon === LayoutDashboard
+                    ? "/dashboard"
+                    : item.icon === ReceiptText
+                      ? "/transactions"
+                      : item.icon === BarChart3
+                        ? "/analysis"
+                        : item.icon === Gauge
+                          ? "/credit-score"
+                          : item.icon === CreditCard
+                            ? "/credit-request"
+                            : "/connect-accounts"
+                }
                 key={item.label}
                 className={
                   item.active
@@ -426,7 +438,17 @@ export default function CreditScorePage() {
 
           return (
             <a
-              href={item.active ? "/credit-score" : "/dashboard"}
+              href={
+                item.icon === Home
+                  ? "/dashboard"
+                  : item.icon === List
+                    ? "/transactions"
+                    : item.icon === BarChart3
+                      ? "/analysis"
+                      : item.icon === BadgeCheck
+                        ? "/credit-score"
+                        : "/dashboard"
+              }
               key={item.label}
               className={
                 item.active

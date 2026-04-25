@@ -36,18 +36,18 @@ const navItems = [
     active: true,
   },
   { label: "Transações", href: "/transactions", icon: ReceiptText },
-  { label: "Análise", href: "/dashboard", icon: BarChart3 },
+  { label: "Análise", href: "/analysis", icon: BarChart3 },
   { label: "Score de Crédito", href: "/credit-score", icon: Gauge },
   { label: "Solicitar Crédito", href: "/credit-request", icon: CreditCard },
   { label: "Instituições", href: "/connect-accounts", icon: Building2 },
 ];
 
 const bottomNavItems = [
-  { label: "Home", icon: Home, active: true },
-  { label: "Atividade", icon: List },
-  { label: "Solicitar", icon: CirclePlus, primary: true },
-  { label: "Análise", icon: BarChart3 },
-  { label: "Perfil", icon: User },
+  { label: "Home", href: "/dashboard", icon: Home, active: true },
+  { label: "Atividade", href: "/transactions", icon: List },
+  { label: "Solicitar", href: "/credit-request", icon: CirclePlus, primary: true },
+  { label: "Análise", href: "/analysis", icon: BarChart3 },
+  { label: "Perfil", href: "/dashboard", icon: User },
 ];
 
 type DashboardAccount = {
@@ -496,7 +496,7 @@ export default function DashboardPage() {
 
             return (
               <a
-                href={item.primary ? "/credit-request" : "/dashboard"}
+                href={item.href}
                 key={item.label}
                 className={
                   item.primary

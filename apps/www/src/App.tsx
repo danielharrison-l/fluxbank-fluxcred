@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import AnalysisPage from "./app/analysis/page";
 import AccountsPage from "./app/accounts/page";
 import ConnectAccountsPage from "./app/connect-accounts/page";
 import CreditRequestPage from "./app/credit-request/page";
@@ -75,6 +76,14 @@ export function App() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analysis"
+        element={
+          <ProtectedRoute>
+            <AnalysisPage />
           </ProtectedRoute>
         }
       />

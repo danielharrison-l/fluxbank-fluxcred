@@ -284,7 +284,17 @@ export default function ConnectAccountsPage() {
 
               return (
                 <a
-                  href={navItemHrefByLabel[item.label] ?? "/connect-accounts"}
+                  href={
+                    item.icon === LayoutDashboard
+                      ? "/dashboard"
+                      : item.icon === Building2
+                        ? "/connect-accounts"
+                        : item.icon === ReceiptText
+                          ? "/transactions"
+                          : item.icon === BarChart3
+                            ? "/analysis"
+                            : "/dashboard"
+                  }
                   key={item.label}
                   className={
                     item.active
@@ -528,7 +538,17 @@ export default function ConnectAccountsPage() {
 
           return (
             <a
-              href={bottomNavHrefByLabel[item.label] ?? "/connect-accounts"}
+              href={
+                item.icon === Home
+                  ? "/dashboard"
+                  : item.icon === List
+                    ? "/transactions"
+                    : item.icon === Landmark
+                      ? "/credit-request"
+                      : item.icon === BarChart3
+                        ? "/analysis"
+                        : "/dashboard"
+              }
               key={item.label}
               className={
                 item.active
