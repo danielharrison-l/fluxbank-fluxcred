@@ -20,6 +20,11 @@ export class MailService {
   async sendEmailVerification(input: VerificationEmailInput) {
     const link = `${this.getAppWebUrl()}/verify-email?token=${encodeURIComponent(input.token)}&email=${encodeURIComponent(input.email)}`;
 
+    if (this.shouldLogEmailInsteadOfSending()) {
+      console.log(`Email verification link for ${input.email}: ${link}`);
+      return;
+    }
+
     await this.getResendClient().emails.send({
       from: this.getMailFrom(),
       to: input.email,
@@ -52,6 +57,11 @@ export class MailService {
 
   async sendPasswordReset(input: PasswordResetEmailInput) {
     const link = `${this.getAppWebUrl()}/reset-password?token=${encodeURIComponent(input.token)}&email=${encodeURIComponent(input.email)}`;
+
+    if (this.shouldLogEmailInsteadOfSending()) {
+      console.log(`Password reset link for ${input.email}: ${link}`);
+      return;
+    }
 
     await this.getResendClient().emails.send({
       from: this.getMailFrom(),
@@ -101,6 +111,19 @@ export class MailService {
     return this.resendClient;
   }
 
+  private shouldLogEmailInsteadOfSending() {
+    const explicitMode = process.env.MAIL_DELIVERY_MODE?.trim().toLowerCase();
+
+    if (explicitMode === "console") {
+      return true;
+    }
+
+    return (
+      !process.env.RESEND_API_KEY?.trim() &&
+      process.env.NODE_ENV !== "production"
+    );
+  }
+
   private getMailFrom() {
     const from = process.env.MAIL_FROM?.trim();
 
@@ -115,9 +138,7 @@ export class MailService {
     const appWebUrl = process.env.APP_WEB_URL?.trim().replace(/\/$/, "");
 
     if (!appWebUrl) {
-      throw new ServiceUnavailableException(
-        "APP_WEB_URL não foi configurada.",
-      );
+      throw new ServiceUnavailableException("APP_WEB_URL não foi configurada.");
     }
 
     return appWebUrl;
