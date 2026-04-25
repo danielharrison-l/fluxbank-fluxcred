@@ -41,18 +41,18 @@ const banks = [
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Institutions", icon: Building2, active: true },
-  { label: "Transactions", icon: ReceiptText },
-  { label: "Analysis", icon: BarChart3 },
-  { label: "Settings", icon: Settings },
+  { label: "Instituicoes", icon: Building2, active: true },
+  { label: "Transacoes", icon: ReceiptText },
+  { label: "Analise", icon: BarChart3 },
+  { label: "Configuracoes", icon: Settings },
 ];
 
 const bottomNavItems = [
   { label: "Home", icon: Home },
-  { label: "Activity", icon: List },
-  { label: "Credit", icon: Landmark, active: true },
-  { label: "Analysis", icon: BarChart3 },
-  { label: "Profile", icon: User },
+  { label: "Atividade", icon: List },
+  { label: "Credito", icon: Landmark, active: true },
+  { label: "Analise", icon: BarChart3 },
+  { label: "Perfil", icon: User },
 ];
 
 type ConnectionStatus = "idle" | "loading" | "success" | "error";
@@ -113,12 +113,13 @@ async function loadPluggyConnect() {
     script.async = true;
     script.dataset.pluggyConnect = "true";
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Unable to load Pluggy Connect"));
+    script.onerror = () =>
+      reject(new Error("Nao foi possivel carregar o Pluggy Connect"));
     document.body.appendChild(script);
   });
 
   if (!window.PluggyConnect) {
-    throw new Error("Pluggy Connect SDK is unavailable");
+    throw new Error("Pluggy Connect nao esta disponivel");
   }
 
   return window.PluggyConnect;
@@ -257,7 +258,7 @@ export default function ConnectAccountsPage() {
               FluxCred
             </h2>
             <p className="text-xs font-medium text-slate-500">
-              Corporate Modern Finance
+              Financas modernas
             </p>
           </div>
 
@@ -355,7 +356,7 @@ export default function ConnectAccountsPage() {
                   <div className="flex flex-col gap-4 border-t border-slate-100 bg-slate-50 p-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                        Powered by
+                        Tecnologia
                       </span>
                       <span className="text-sm font-bold text-[#506383]">
                         Pluggy
@@ -530,3 +531,4 @@ export default function ConnectAccountsPage() {
     </main>
   );
 }
+

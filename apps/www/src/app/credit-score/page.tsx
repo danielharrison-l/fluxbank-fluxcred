@@ -28,19 +28,19 @@ import { apiRequest, formatCurrency } from "@/lib/api";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Transactions", icon: ReceiptText },
-  { label: "Analysis", icon: BarChart3 },
-  { label: "Credit Score", icon: Gauge, active: true },
-  { label: "Credit Request", icon: CreditCard },
-  { label: "Institutions", icon: Building2 },
+  { label: "Transacoes", icon: ReceiptText },
+  { label: "Analise", icon: BarChart3 },
+  { label: "Score de Credito", icon: Gauge, active: true },
+  { label: "Solicitar Credito", icon: CreditCard },
+  { label: "Instituicoes", icon: Building2 },
 ];
 
 const bottomNavItems = [
   { label: "Home", icon: Home },
-  { label: "Activity", icon: List },
-  { label: "Credit", icon: BadgeCheck, active: true },
-  { label: "Analysis", icon: BarChart3 },
-  { label: "Profile", icon: User },
+  { label: "Atividade", icon: List },
+  { label: "Credito", icon: BadgeCheck, active: true },
+  { label: "Analise", icon: BarChart3 },
+  { label: "Perfil", icon: User },
 ];
 
 type CreditDecision = "APPROVED" | "MANUAL_REVIEW" | "REJECTED";
@@ -195,14 +195,14 @@ export default function CreditScorePage() {
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
           >
             <Settings className="size-5" aria-hidden="true" />
-            Settings
+            Configuracoes
           </a>
           <a
             href="/login"
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
           >
             <LogOut className="size-5" aria-hidden="true" />
-            Logout
+            Sair
           </a>
         </div>
       </aside>
@@ -215,7 +215,7 @@ export default function CreditScorePage() {
                 FluxCred
               </span>
               <h2 className="hidden font-mono text-lg font-semibold text-slate-600 md:block">
-                Credit Score Analysis
+                Analise de Score
               </h2>
             </div>
 
@@ -226,7 +226,7 @@ export default function CreditScorePage() {
                   aria-hidden="true"
                 />
                 <Input
-                  placeholder="Search..."
+                  placeholder="Buscar..."
                   className="h-10 w-48 rounded-full border-0 bg-slate-100 pl-10 shadow-none focus-visible:ring-[#00766d] lg:w-64"
                 />
               </div>
@@ -274,13 +274,13 @@ export default function CreditScorePage() {
               <div className="flex flex-col justify-center">
                 <div className="mb-7 flex flex-wrap gap-3">
                   <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700">
-                    • {decisionLabel(score?.decision)}
+                    {decisionLabel(score?.decision)}
                   </span>
                   <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-300">
-                    • Em analise
+                    Em analise
                   </span>
                   <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-300">
-                    • Negado
+                    Negado
                   </span>
                 </div>
 
@@ -357,7 +357,7 @@ export default function CreditScorePage() {
                   asChild
                   className="mt-8 h-14 w-full rounded-lg bg-white font-bold text-[#007d82] hover:bg-white/90"
                 >
-                  <a href="/credit-request">Solicitar Aumento</a>
+                  <a href="/credit-request">Solicitar aumento</a>
                 </Button>
               </div>
               <Gauge
@@ -445,3 +445,4 @@ export default function CreditScorePage() {
     </main>
   );
 }
+

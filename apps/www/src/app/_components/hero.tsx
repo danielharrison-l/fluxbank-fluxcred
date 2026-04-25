@@ -1,6 +1,5 @@
-import { Github } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GITHUB_PROJECT_URL } from "@/lib/constants";
 
 export function Hero() {
   return (
@@ -13,28 +12,28 @@ export function Hero() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-chart-2"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
           </span>
-          Built in public, open source from day one
+          Analise de credito com dados reais do Open Finance
         </div>
         <div className="flex max-w-5xl flex-col items-center gap-6">
           <h1 className="text-balance text-5xl font-bold leading-tight tracking-tight text-foreground md:text-7xl lg:text-8xl">
-            Capture anything, in any moment
+            Credito mais justo para quem trabalha por conta propria
           </h1>
           <p className="max-w-2xl text-balance text-lg leading-relaxed text-muted-foreground md:text-xl">
-            A simple, frictionless app to capture text, links, images, audio,
-            and files, allowing you to find them later with smart search and
-            automatic connections of related topics.
+            Conecte suas contas, gere seu score e solicite credito com uma
+            analise baseada no seu fluxo financeiro real.
           </p>
           <div className="flex flex-col items-center gap-4 pt-5 sm:flex-row">
-            <Button asChild size="lg" variant="outline">
+            <Button asChild size="lg">
               <a
-                href={GITHUB_PROJECT_URL}
+                href="/register?view=form"
                 className="flex items-center gap-2"
-                target="_blank"
-                rel="noreferrer"
               >
-                <Github className="h-4 w-4" />
-                View on GitHub
+                Criar conta
+                <ArrowRight className="h-4 w-4" />
               </a>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <a href="/login?view=form">Entrar</a>
             </Button>
           </div>
         </div>

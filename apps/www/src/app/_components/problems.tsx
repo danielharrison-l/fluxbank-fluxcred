@@ -3,59 +3,59 @@ import { AlertCircle, FolderX, Layers, Link2Off } from "lucide-react";
 const problems = [
   {
     icon: AlertCircle,
-    title: "Friction in capture",
+    title: "Credito pouco personalizado",
     description:
-      'Existing tools ask "where does this go?" before you can even write. That costs ideas and time.',
+      "Analises tradicionais ignoram parte importante do fluxo financeiro de autonomos e profissionais liberais.",
   },
   {
     icon: FolderX,
-    title: "Lost knowledge",
+    title: "Dados espalhados",
     description:
-      "Information gets buried in folders, notebooks, or endless scrolls, never to be found again.",
+      "Contas, saldos e transacoes ficam em bancos diferentes, dificultando uma avaliacao rapida.",
   },
   {
     icon: Layers,
-    title: "Rigid organization",
+    title: "Processos lentos",
     description:
-      "Forced to fit thoughts into structures that don't match your mental model.",
+      "Solicitacoes manuais pedem documentos demais e atrasam a resposta para quem precisa de credito.",
   },
   {
     icon: Link2Off,
-    title: "Disconnected insights",
+    title: "Pouca visibilidade",
     description:
-      "Notes stay siloed, so related ideas never surface together when you need them.",
+      "Sem clareza dos fatores de risco, fica dificil entender como melhorar o proprio score.",
   },
 ];
 
 export function Problems() {
   return (
-    <section id="problem" className="scroll-mt-20 py-16 lg:py-24 px-5">
+    <section id="problem" className="scroll-mt-20 px-5 py-16 lg:py-24">
       <div className="container mx-auto">
-        <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-balance">
-            The problem with traditional note-taking
+        <div className="mx-auto mb-10 max-w-3xl text-center lg:mb-16">
+          <h2 className="mb-4 text-balance text-3xl font-bold sm:text-4xl">
+            O desafio do credito para autonomos
           </h2>
-          <p className="text-lg text-muted-foreground text-pretty leading-relaxed">
-            Most tools force you to organize before you capture. By the time you
-            decide where something goes, the thought is already gone.
+          <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
+            A FluxCred usa dados autorizados via Open Finance para reduzir
+            incerteza e gerar uma avaliacao mais completa.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
           {problems.map((problem) => (
             <div
               key={problem.title}
-              className="group relative rounded-lg border border-border bg-card/30 p-6 hover:border-foreground/30 transition-all duration-300"
+              className="group relative rounded-lg border border-border bg-card/30 p-6 transition-all duration-300 hover:border-foreground/30"
             >
               <div className="flex items-start gap-4">
-                <div className="rounded-lg bg-accent/30 p-3 group-hover:bg-accent transition-colors">
+                <div className="rounded-lg bg-accent/30 p-3 transition-colors group-hover:bg-accent">
                   <problem.icon className="h-6 w-6 text-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">
+                  <h3 className="mb-2 text-lg font-semibold">
                     {problem.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {problem.description}
                   </p>
                 </div>

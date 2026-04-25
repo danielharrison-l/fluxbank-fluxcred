@@ -27,19 +27,19 @@ import { apiRequest, formatCurrency, formatDate } from "@/lib/api";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Transactions", icon: ReceiptText },
-  { label: "Analysis", icon: BarChart3 },
-  { label: "Credit Score", icon: Gauge },
-  { label: "Credit Request", icon: WalletCards, active: true },
-  { label: "Institutions", icon: Building2 },
+  { label: "Transacoes", icon: ReceiptText },
+  { label: "Analise", icon: BarChart3 },
+  { label: "Score de Credito", icon: Gauge },
+  { label: "Solicitar Credito", icon: WalletCards, active: true },
+  { label: "Instituicoes", icon: Building2 },
 ];
 
 const bottomNavItems = [
   { label: "Home", icon: Home },
-  { label: "Activity", icon: List },
-  { label: "Analysis", icon: BarChart3 },
-  { label: "Credit", icon: BadgeCheck, active: true },
-  { label: "Profile", icon: User },
+  { label: "Atividade", icon: List },
+  { label: "Analise", icon: BarChart3 },
+  { label: "Credito", icon: BadgeCheck, active: true },
+  { label: "Perfil", icon: User },
 ];
 
 type CreditScore = {
@@ -160,7 +160,7 @@ export default function CreditRequestPage() {
               aria-hidden="true"
             />
             <Input
-              placeholder="Search data..."
+              placeholder="Buscar dados..."
               className="h-9 w-72 rounded-full border-0 bg-slate-100 pl-10 shadow-none focus-visible:ring-[#00766d]"
             />
           </div>
@@ -194,7 +194,7 @@ export default function CreditRequestPage() {
               FluxCred
             </h2>
             <p className="text-xs font-medium text-slate-500">
-              Corporate Modern Finance
+              Financas modernas
             </p>
           </div>
 
@@ -225,14 +225,14 @@ export default function CreditRequestPage() {
               className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#00766d]"
             >
               <Settings className="size-5" aria-hidden="true" />
-              Settings
+              Configuracoes
             </a>
             <a
               href="/login"
               className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#00766d]"
             >
               <LogOut className="size-5" aria-hidden="true" />
-              Logout
+              Sair
             </a>
           </div>
         </aside>
@@ -247,7 +247,7 @@ export default function CreditRequestPage() {
 
             <div>
               <h1 className="font-mono text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">
-                Credit Request
+                Solicitar Credito
               </h1>
               <p className="mt-2 max-w-xl text-base leading-7 text-[#506383]">
                 Solicite financiamento com as melhores taxas do mercado
@@ -399,3 +399,4 @@ export default function CreditRequestPage() {
     </main>
   );
 }
+

@@ -7,38 +7,38 @@ export function Header() {
         <a
           href="/"
           className="flex items-center gap-2 text-lg font-semibold"
-          aria-label="Loci home"
+          aria-label="Pagina inicial FluxCred"
         >
           <img
-            alt="Loci logo"
+            alt="FluxCred logo"
             src="/logo.svg"
             className="dark:invert"
             width={18}
             height={18}
           />
-          <span className="text-xl">Loci</span>
+          <span className="text-xl">FluxCred</span>
         </a>
         <nav
-          aria-label="Primary"
+          aria-label="Principal"
           className="hidden md:flex items-center gap-8 text-sm"
         >
           <a
             href="#problem"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
-            Problem
+            Desafio
           </a>
           <a
             href="#features"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
-            Features
+            Recursos
           </a>
           <a
             href="#open-source"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
-            Open Source
+            Tecnologia
           </a>
         </nav>
         <div className="flex items-center gap-2">

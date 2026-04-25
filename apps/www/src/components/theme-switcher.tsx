@@ -39,7 +39,7 @@ export function ThemeSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           aria-haspopup="menu"
-          aria-label="Toggle theme"
+          aria-label="Alternar tema"
           variant="ghost"
           size="icon"
           className="cursor-pointer"
@@ -53,7 +53,7 @@ export function ThemeSwitcher() {
             aria-hidden
             className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100"
           />
-          <span className="sr-only">Toggle theme</span>
+          <span className="sr-only">Alternar tema</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent data-testid="theme-menu">
@@ -62,21 +62,21 @@ export function ThemeSwitcher() {
           data-testid="theme-light"
           onClick={() => setTheme("light")}
         >
-          <SunIcon aria-hidden /> Light
+          <SunIcon aria-hidden /> Claro
         </DropdownMenuItem>
         <DropdownMenuItem
           role="menuitem"
           data-testid="theme-dark"
           onClick={() => setTheme("dark")}
         >
-          <MoonIcon aria-hidden /> Dark
+          <MoonIcon aria-hidden /> Escuro
         </DropdownMenuItem>
         <DropdownMenuItem
           role="menuitem"
           data-testid="theme-system"
           onClick={() => setTheme("system")}
         >
-          <LaptopMinimalIcon aria-hidden /> System
+          <LaptopMinimalIcon aria-hidden /> Sistema
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

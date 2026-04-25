@@ -3,67 +3,67 @@ import { Inbox, Network, Search, Send, Tag, Zap } from "lucide-react";
 const features = [
   {
     icon: Zap,
-    title: "Instant Capture",
+    title: "Score em tempo real",
     description:
-      "Capture from anywhere with global hotkeys, mobile share sheets, and browser extensions. Text, voice, images, files — all instantly.",
+      "Calcule seu score com base nas contas conectadas e no comportamento financeiro recente.",
   },
   {
     icon: Inbox,
-    title: "Universal Inbox",
+    title: "Contas conectadas",
     description:
-      "Everything lands in one frictionless stream. No folders, no tags required. Just capture and move on.",
+      "Centralize saldos e transacoes em uma visao clara para acelerar sua analise de credito.",
   },
   {
     icon: Search,
-    title: "Smart Retrieval",
+    title: "Analise transparente",
     description:
-      "Natural language search across all your notes. OCR from images, transcribed audio, and contextual surfacing of related content.",
+      "Entenda os fatores que influenciam sua aprovacao, como renda, estabilidade e gastos.",
   },
   {
     icon: Network,
-    title: "Automatic Connections",
+    title: "Conexoes automaticas",
     description:
-      "Your notes form a dynamic knowledge graph that updates as you add more. Explore clusters and relationships visually.",
+      "Use Open Finance para sincronizar dados com seguranca e reduzir etapas manuais.",
   },
   {
     icon: Tag,
-    title: "Lightweight Organization",
+    title: "Solicitacao simples",
     description:
-      "Add tags and links later if you want. Smart suggestions and auto-clustering help organize without the overhead.",
+      "Peca credito direto pela plataforma com limite recomendado a partir do seu score.",
   },
   {
     icon: Send,
-    title: "Cross-Platform Sync",
+    title: "Acompanhamento continuo",
     description:
-      "Real-time sync across desktop, mobile, and web. Works offline and syncs when you're back online.",
+      "Acompanhe contas, transacoes, score e solicitacoes em um unico dashboard.",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="scroll-mt-20 py-16 lg:py-24 px-5">
+    <section id="features" className="scroll-mt-20 px-5 py-16 lg:py-24">
       <div className="container mx-auto">
-        <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-balance">
-            Built for speed, designed for connections
+        <div className="mx-auto mb-10 max-w-3xl text-center lg:mb-16">
+          <h2 className="mb-4 text-balance text-3xl font-bold sm:text-4xl">
+            Feito para credito rapido, claro e conectado
           </h2>
-          <p className="text-lg text-muted-foreground text-pretty leading-relaxed">
-            Loci removes friction from every step — from capture to retrieval to
-            discovery.
+          <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
+            A FluxCred reduz atrito em cada etapa: conexao, analise, score e
+            solicitacao.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="group relative rounded-lg border border-border bg-card/30 p-6 hover:border-foreground/30 hover:shadow-lg transition-all duration-300"
+              className="group relative rounded-lg border border-border bg-card/30 p-6 transition-all duration-300 hover:border-foreground/30 hover:shadow-lg"
             >
-              <div className="mb-4 inline-flex rounded-lg bg-accent/30 p-3 group-hover:bg-accent transition-colors">
+              <div className="mb-4 inline-flex rounded-lg bg-accent/30 p-3 transition-colors group-hover:bg-accent">
                 <feature.icon className="h-6 w-6 text-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <h3 className="mb-3 text-xl font-semibold">{feature.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {feature.description}
               </p>
             </div>
