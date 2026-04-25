@@ -31,7 +31,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException("Invalid token");
     }
 
-    const { passwordHash: _passwordHash, ...safeUser } = user;
+    const {
+      passwordHash: _passwordHash,
+      refreshTokenHash: _refreshTokenHash,
+      refreshTokenExpiresAt: _refreshTokenExpiresAt,
+      ...safeUser
+    } = user;
     return safeUser;
   }
 }

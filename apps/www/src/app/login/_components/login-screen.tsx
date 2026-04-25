@@ -12,6 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { storeAccessToken } from "@/lib/auth";
 import { getApiBaseUrl, parseJsonResponse } from "@/lib/api";
 
 export function LoginScreen() {
@@ -31,6 +32,7 @@ export function LoginScreen() {
     try {
       const response = await fetch(`${apiBaseUrl}/auth/login`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: String(formData.get("email") ?? ""),
@@ -48,8 +50,7 @@ export function LoginScreen() {
         throw new Error("A API não retornou o token de acesso.");
       }
 
-      window.localStorage.setItem("accessToken", data.accessToken);
-      window.localStorage.setItem("fluxcred.accessToken", data.accessToken);
+      storeAccessToken(data.accessToken);
       navigate("/dashboard");
     } catch (error) {
       setErrorMessage(

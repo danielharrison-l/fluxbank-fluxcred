@@ -5,38 +5,15 @@ import ConnectAccountsPage from "./app/connect-accounts/page";
 import CreditRequestPage from "./app/credit-request/page";
 import CreditScorePage from "./app/credit-score/page";
 import DashboardPage from "./app/dashboard/page";
+import LogoutPage from "./app/logout/page";
 import Home from "./app/page";
 import LoginPage from "./app/login/page";
 import RegisterPage from "./app/register/page";
 import TransactionsPage from "./app/transactions/page";
-
-const authTokenKeys = ["accessToken", "token", "fluxcred.accessToken"];
-
-function getStoredAuthToken() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const localToken = authTokenKeys
-    .map((key) => window.localStorage.getItem(key))
-    .find(Boolean);
-
-  if (localToken) {
-    return localToken;
-  }
-
-  const cookieToken = document.cookie
-    .split(";")
-    .map((cookie) => cookie.trim())
-    .find((cookie) =>
-      authTokenKeys.some((key) => cookie.startsWith(`${key}=`)),
-    );
-
-  return cookieToken?.split("=")[1] ?? null;
-}
+import { getStoredAccessToken } from "./lib/auth";
 
 function hasStoredSession() {
-  return Boolean(getStoredAuthToken());
+  return Boolean(getStoredAccessToken());
 }
 
 function EntryRoute() {
@@ -71,6 +48,7 @@ export function App() {
           </PublicAuthRoute>
         }
       />
+      <Route path="/logout" element={<LogoutPage />} />
       <Route
         path="/dashboard"
         element={

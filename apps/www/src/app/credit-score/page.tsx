@@ -210,7 +210,7 @@ export default function CreditScorePage() {
             Configurações
           </a>
           <a
-            href="/login"
+            href="/logout"
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
           >
             <LogOut className="size-5" aria-hidden="true" />

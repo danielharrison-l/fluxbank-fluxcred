@@ -43,7 +43,25 @@ export class UsersService {
       return null;
     }
 
-    const { passwordHash: _passwordHash, ...safeUser } = user;
+    const {
+      passwordHash: _passwordHash,
+      refreshTokenHash: _refreshTokenHash,
+      refreshTokenExpiresAt: _refreshTokenExpiresAt,
+      ...safeUser
+    } = user;
     return safeUser;
+  }
+
+  async updateRefreshSession(
+    userId: string,
+    data: {
+      refreshTokenHash: string | null;
+      refreshTokenExpiresAt: Date | null;
+    },
+  ) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
   }
 }

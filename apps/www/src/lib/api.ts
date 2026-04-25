@@ -1,3 +1,5 @@
+import { clearAuthSession, getStoredAccessToken, storeAccessToken } from "./auth";
+
 declare global {
   interface Window {
     __APP_CONFIG__?: {
@@ -6,9 +8,13 @@ declare global {
   }
 }
 
+let refreshPromise: Promise<string | null> | null = null;
+
 function getConfiguredApiBaseUrl() {
   const runtimeValue =
-    typeof window !== "undefined" ? window.__APP_CONFIG__?.VITE_API_URL : undefined;
+    typeof window !== "undefined"
+      ? window.__APP_CONFIG__?.VITE_API_URL
+      : undefined;
   const buildValue = import.meta.env.VITE_API_URL;
   const resolvedValue = runtimeValue || buildValue;
 
@@ -56,9 +62,7 @@ export function getApiBaseUrl() {
       return "http://localhost:3000";
     }
 
-    throw new Error(
-      "VITE_API_URL não foi configurada para este ambiente.",
-    );
+    throw new Error("VITE_API_URL não foi configurada para este ambiente.");
   }
 
   if (/^\//.test(configuredApiBaseUrl)) {
@@ -79,18 +83,6 @@ export function getApiBaseUrl() {
   return configuredApiBaseUrl;
 }
 
-export function getAccessToken() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return (
-    window.localStorage.getItem("accessToken") ??
-    window.localStorage.getItem("token") ??
-    window.localStorage.getItem("fluxcred.accessToken")
-  );
-}
-
 export async function parseJsonResponse<T>(response: Response) {
   const text = await response.text();
 
@@ -101,22 +93,77 @@ export async function parseJsonResponse<T>(response: Response) {
   return JSON.parse(text) as T;
 }
 
+async function refreshAccessToken() {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        clearAuthSession();
+        return null;
+      }
+
+      const data = await parseJsonResponse<{ accessToken?: string }>(response);
+
+      if (!data?.accessToken) {
+        clearAuthSession();
+        return null;
+      }
+
+      storeAccessToken(data.accessToken);
+      return data.accessToken;
+    } catch {
+      clearAuthSession();
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 export async function apiRequest<T>(path: string, init?: RequestInit) {
-  const accessToken = getAccessToken();
   const apiBaseUrl = getApiBaseUrl();
+  let accessToken = getStoredAccessToken();
+
+  if (!accessToken) {
+    accessToken = await refreshAccessToken();
+  }
 
   if (!accessToken) {
     throw new Error("Faça login para continuar.");
   }
 
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-      ...init?.headers,
-    },
-  });
+  const executeRequest = async (token: string) =>
+    fetch(`${apiBaseUrl}${path}`, {
+      ...init,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        ...init?.headers,
+      },
+    });
+
+  let response = await executeRequest(accessToken);
+
+  if (response.status === 401) {
+    const refreshedToken = await refreshAccessToken();
+
+    if (!refreshedToken) {
+      throw new Error("Faça login para continuar.");
+    }
+
+    response = await executeRequest(refreshedToken);
+  }
 
   if (!response.ok) {
     const data = await parseJsonResponse<{ message?: string | string[] }>(
@@ -127,11 +174,22 @@ export async function apiRequest<T>(path: string, init?: RequestInit) {
         ? data.message
         : Array.isArray(data?.message)
           ? data.message.join(", ")
-        : "Não foi possível concluir a requisição.";
+          : "Não foi possível concluir a requisição.";
     throw new Error(message);
   }
 
   return parseJsonResponse<T>(response) as Promise<T>;
+}
+
+export async function logout() {
+  try {
+    await fetch(`${getApiBaseUrl()}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } finally {
+    clearAuthSession();
+  }
 }
 
 export function formatCurrency(value?: number | string | null) {
