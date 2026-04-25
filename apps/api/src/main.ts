@@ -4,10 +4,41 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { apiReference } from "@scalar/nestjs-api-reference";
 import { AppModule } from "./app.module";
 
+function getAllowedOrigins() {
+  const configuredOrigins = process.env.CORS_ORIGIN?.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  if (!configuredOrigins?.length) {
+    throw new Error(
+      "CORS_ORIGIN must be defined in environment variables",
+    );
+  }
+
+  return configuredOrigins;
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const allowedOrigins = getAllowedOrigins();
 
-  app.enableCors();
+  app.enableCors({
+    origin: (
+      origin: string | undefined,
+      callback: (error: Error | null, allow?: boolean) => void,
+    ) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Origin not allowed by CORS"), false);
+    },
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
+    optionsSuccessStatus: 204,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
