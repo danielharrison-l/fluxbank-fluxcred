@@ -11,31 +11,31 @@ const features = [
     icon: Inbox,
     title: "Contas conectadas",
     description:
-      "Centralize saldos e transacoes em uma visao clara para acelerar sua analise de credito.",
+      "Centralize saldos e transações em uma visão clara para acelerar sua análise de crédito.",
   },
   {
     icon: Search,
-    title: "Analise transparente",
+    title: "Análise transparente",
     description:
-      "Entenda os fatores que influenciam sua aprovacao, como renda, estabilidade e gastos.",
+      "Entenda os fatores que influenciam sua aprovação, como renda, estabilidade e gastos.",
   },
   {
     icon: Network,
-    title: "Conexoes automaticas",
+    title: "Conexões automáticas",
     description:
-      "Use Open Finance para sincronizar dados com seguranca e reduzir etapas manuais.",
+      "Use Open Finance para sincronizar dados com segurança e reduzir etapas manuais.",
   },
   {
     icon: Tag,
-    title: "Solicitacao simples",
+    title: "Solicitação simples",
     description:
-      "Peca credito direto pela plataforma com limite recomendado a partir do seu score.",
+      "Peça crédito direto pela plataforma com limite recomendado a partir do seu score.",
   },
   {
     icon: Send,
     title: "Acompanhamento continuo",
     description:
-      "Acompanhe contas, transacoes, score e solicitacoes em um unico dashboard.",
+      "Acompanhe contas, transações, score e solicitações em um único dashboard.",
   },
 ];
 
@@ -45,11 +45,11 @@ export function Features() {
       <div className="container mx-auto">
         <div className="mx-auto mb-10 max-w-3xl text-center lg:mb-16">
           <h2 className="mb-4 text-balance text-3xl font-bold sm:text-4xl">
-            Feito para credito rapido, claro e conectado
+            Feito para crédito rápido, claro e conectado
           </h2>
           <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
-            A FluxCred reduz atrito em cada etapa: conexao, analise, score e
-            solicitacao.
+            A FluxCred reduz atrito em cada etapa: conexão, análise, score e
+            solicitação.
           </p>
         </div>
 

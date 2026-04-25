@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { apiRequest as authenticatedApiRequest } from "@/lib/api";
 
 const banks = [
-  { name: "Itau", initials: "I", className: "bg-orange-500 text-white" },
+  { name: "Itaú", initials: "I", className: "bg-orange-500 text-white" },
   { name: "Bradesco", initials: "B", className: "bg-red-600 text-white" },
   { name: "Nubank", initials: "N", className: "bg-purple-700 text-white" },
   {
@@ -41,17 +41,17 @@ const banks = [
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Instituicoes", icon: Building2, active: true },
-  { label: "Transacoes", icon: ReceiptText },
-  { label: "Analise", icon: BarChart3 },
-  { label: "Configuracoes", icon: Settings },
+  { label: "Instituições", icon: Building2, active: true },
+  { label: "Transações", icon: ReceiptText },
+  { label: "Análise", icon: BarChart3 },
+  { label: "Configurações", icon: Settings },
 ];
 
 const bottomNavItems = [
   { label: "Home", icon: Home },
   { label: "Atividade", icon: List },
-  { label: "Credito", icon: Landmark, active: true },
-  { label: "Analise", icon: BarChart3 },
+  { label: "Crédito", icon: Landmark, active: true },
+  { label: "Análise", icon: BarChart3 },
   { label: "Perfil", icon: User },
 ];
 
@@ -114,12 +114,12 @@ async function loadPluggyConnect() {
     script.dataset.pluggyConnect = "true";
     script.onload = () => resolve();
     script.onerror = () =>
-      reject(new Error("Nao foi possivel carregar o Pluggy Connect"));
+      reject(new Error("Não foi possível carregar o Pluggy Connect"));
     document.body.appendChild(script);
   });
 
   if (!window.PluggyConnect) {
-    throw new Error("Pluggy Connect nao esta disponivel");
+    throw new Error("Pluggy Connect não está disponível");
   }
 
   return window.PluggyConnect;
@@ -170,7 +170,7 @@ export default function ConnectAccountsPage() {
 
           if (!itemId) {
             setStatus("error");
-            setErrorMessage("A Pluggy nao retornou o item conectado.");
+            setErrorMessage("A Pluggy não retornou o item conectado.");
             return;
           }
 
@@ -188,14 +188,14 @@ export default function ConnectAccountsPage() {
             setErrorMessage(
               error instanceof Error
                 ? error.message
-                : "A instituicao foi conectada, mas a sincronizacao falhou.",
+                : "A instituição foi conectada, mas a sincronização falhou.",
             );
           }
         },
         onError: (error) => {
           setStatus("error");
           setErrorMessage(
-            error.message ?? "Falha na autenticacao com o banco.",
+            error.message ?? "Falha na autenticação com o banco.",
           );
         },
       });
@@ -206,7 +206,7 @@ export default function ConnectAccountsPage() {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Nao foi possivel iniciar a conexao.",
+          : "Não foi possível iniciar a conexão.",
       );
     }
   }
@@ -241,7 +241,7 @@ export default function ConnectAccountsPage() {
           <button
             type="button"
             className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
-            aria-label="Notificacoes"
+            aria-label="Notificações"
           >
             <Bell className="size-5" aria-hidden="true" />
           </button>
@@ -258,7 +258,7 @@ export default function ConnectAccountsPage() {
               FluxCred
             </h2>
             <p className="text-xs font-medium text-slate-500">
-              Financas modernas
+              Finanças modernas
             </p>
           </div>
 
@@ -299,7 +299,7 @@ export default function ConnectAccountsPage() {
                   Conectar Conta
                 </h1>
                 <p className="mt-2 max-w-xl text-base leading-7 text-[#506383]">
-                  Utilizamos o Pluggy para uma conexao segura via Open Finance.
+                  Utilizamos o Pluggy para uma conexão segura via Open Finance.
                 </p>
               </div>
 
@@ -314,7 +314,7 @@ export default function ConnectAccountsPage() {
                 <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                   <div className="border-b border-slate-100 p-6">
                     <h2 className="font-mono text-xl font-semibold text-slate-900">
-                      Selecione sua Instituicao
+                      Selecione sua Instituição
                     </h2>
                     <p className="mt-1 text-sm leading-6 text-[#506383]">
                       Busque ou escolha um dos bancos parceiros abaixo.
@@ -369,7 +369,7 @@ export default function ConnectAccountsPage() {
                     >
                       {status === "loading"
                         ? "Conectando..."
-                        : "Conectar instituicao"}
+                        : "Conectar instituição"}
                     </Button>
                   </div>
                 </section>
@@ -377,7 +377,7 @@ export default function ConnectAccountsPage() {
                 <div className="grid gap-4">
                   {status === "idle" && (
                     <div className="rounded-xl border border-[#c8f1ec] bg-[#eefdfa] p-5 text-sm leading-6 text-[#00766d]">
-                      Selecione uma instituicao e inicie a conexao segura via
+                      Selecione uma instituição e inicie a conexão segura via
                       Pluggy.
                     </div>
                   )}
@@ -388,12 +388,12 @@ export default function ConnectAccountsPage() {
                           <RefreshCw className="size-5" aria-hidden="true" />
                         </span>
                         <h3 className="text-sm font-bold text-[#006d77]">
-                          Sincronizacao em andamento
+                          Sincronização em andamento
                         </h3>
                       </div>
                       <p className="text-xs leading-6 text-[#506383]">
                         Estamos buscando suas contas. Isso pode levar alguns
-                        segundos enquanto validamos as permissoes.
+                        segundos enquanto validamos as permissões.
                       </p>
                       <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
                         <div className="h-full w-[65%] rounded-full bg-[#14b8a6]" />
@@ -411,12 +411,12 @@ export default function ConnectAccountsPage() {
                           />
                         </span>
                         <h3 className="text-sm font-bold text-red-900">
-                          Erro na conexao
+                          Erro na conexão
                         </h3>
                       </div>
                       <p className="text-xs leading-6 text-[#506383]">
                         {errorMessage ??
-                          "Nao foi possivel sincronizar agora. Verifique sua conexao ou tente novamente mais tarde."}
+                          "Não foi possível sincronizar agora. Verifique sua conexão ou tente novamente mais tarde."}
                       </p>
                       <button
                         type="button"
@@ -441,8 +441,8 @@ export default function ConnectAccountsPage() {
                       Conta conectada com sucesso
                     </h3>
                     <p className="mt-3 text-sm leading-6 text-[#506383]">
-                      Sua conta foi vinculada e seus dados ja estao sendo
-                      analisados para sua nova oferta de credito.
+                      Sua conta foi vinculada e seus dados já estão sendo
+                      analisados para sua nova oferta de crédito.
                     </p>
 
                     <div className="mt-6 flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
@@ -451,7 +451,7 @@ export default function ConnectAccountsPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-bold text-slate-950">
-                          {connectedItem?.institutionName ?? "Instituicao"}
+                          {connectedItem?.institutionName ?? "Instituição"}
                         </p>
                         <p className="mt-1 truncate text-[10px] text-[#506383]">
                           Conectada via Pluggy
@@ -471,7 +471,7 @@ export default function ConnectAccountsPage() {
                       Por que conectar?
                     </h3>
                     <p className="mb-4 font-mono text-xl font-semibold leading-snug">
-                      Aumente suas chances de aprovacao em ate 45%
+                      Aumente suas chances de aprovação em até 45%
                     </p>
                     <p className="mb-6 text-xs leading-6 text-white/85">
                       Ao compartilhar seu historico, conseguimos oferecer taxas
@@ -480,9 +480,9 @@ export default function ConnectAccountsPage() {
 
                     <ul className="space-y-4 text-xs font-medium">
                       {[
-                        "Analise em tempo real",
+                        "Análise em tempo real",
                         "Sem burocracia de papelada",
-                        "Voce tem controle total dos dados",
+                        "Você tem controle total dos dados",
                       ].map((item) => (
                         <li className="flex items-start gap-3" key={item}>
                           <CheckCircle2

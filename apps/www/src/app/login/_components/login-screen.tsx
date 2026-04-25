@@ -12,7 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { apiBaseUrl, parseJsonResponse } from "@/lib/api";
+import { getApiBaseUrl, parseJsonResponse } from "@/lib/api";
 
 export function LoginScreen() {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ export function LoginScreen() {
     setErrorMessage(null);
 
     const formData = new FormData(event.currentTarget);
+    const apiBaseUrl = getApiBaseUrl();
 
     try {
       const response = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -38,13 +39,13 @@ export function LoginScreen() {
       });
 
       if (!response.ok) {
-        throw new Error("E-mail ou senha invalidos.");
+        throw new Error("E-mail ou senha inválidos.");
       }
 
       const data = await parseJsonResponse<{ accessToken?: string }>(response);
 
       if (!data?.accessToken) {
-        throw new Error("A API nao retornou o token de acesso.");
+        throw new Error("A API não retornou o token de acesso.");
       }
 
       window.localStorage.setItem("accessToken", data.accessToken);
@@ -52,7 +53,7 @@ export function LoginScreen() {
       navigate("/dashboard");
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Nao foi possivel entrar.",
+        error instanceof Error ? error.message : "Não foi possível entrar.",
       );
     } finally {
       setIsSubmitting(false);
@@ -80,7 +81,7 @@ export function LoginScreen() {
               <span className="text-4xl font-semibold">FluxCred</span>
             </div>
             <p className="mx-auto max-w-[280px] text-lg leading-7 text-[#506383]">
-              Credito sob medida para autonomos e profissionais liberais
+              Crédito sob medida para autônomos e profissionais liberais
             </p>
           </div>
 
@@ -90,7 +91,7 @@ export function LoginScreen() {
                 htmlFor="email"
                 className="text-xs font-bold uppercase tracking-[0.16em] text-[#506383]"
               >
-                E-mail ou usuario
+                E-mail ou usuário
               </Label>
               <div className="relative">
                 <User
@@ -177,13 +178,13 @@ export function LoginScreen() {
 
           <div className="mt-20 text-center">
             <p className="mx-auto mb-3 max-w-[320px] text-lg leading-7 text-[#506383]">
-              Trabalha por conta propria e precisa de credito?
+              Trabalha por conta própria e precisa de crédito?
             </p>
             <Link
               to="/register?view=form"
               className="text-lg font-bold text-[#0c9a8d] hover:underline"
             >
-              Crie sua conta gratis
+              Crie sua conta grátis
             </Link>
           </div>
 
@@ -194,15 +195,15 @@ export function LoginScreen() {
                 aria-hidden="true"
               />
               <p className="text-sm leading-6 text-[#506383]">
-                Sua seguranca e nossa prioridade. Dados protegidos com o mesmo
-                nivel de seguranca dos grandes bancos.
+                Sua segurança é nossa prioridade. Dados protegidos com o mesmo
+                nível de segurança dos grandes bancos.
               </p>
             </div>
           </div>
         </section>
 
         <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-[#8a9ab2]">
-          FluxCred Solucoes Financeiras © 2024
+          FluxCred Soluções Financeiras © 2024
         </p>
       </div>
 

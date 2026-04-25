@@ -28,18 +28,18 @@ import { apiRequest, formatCurrency } from "@/lib/api";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Transacoes", icon: ReceiptText },
-  { label: "Analise", icon: BarChart3 },
-  { label: "Score de Credito", icon: Gauge, active: true },
-  { label: "Solicitar Credito", icon: CreditCard },
-  { label: "Instituicoes", icon: Building2 },
+  { label: "Transações", icon: ReceiptText },
+  { label: "Análise", icon: BarChart3 },
+  { label: "Score de Crédito", icon: Gauge, active: true },
+  { label: "Solicitar Crédito", icon: CreditCard },
+  { label: "Instituições", icon: Building2 },
 ];
 
 const bottomNavItems = [
   { label: "Home", icon: Home },
   { label: "Atividade", icon: List },
-  { label: "Credito", icon: BadgeCheck, active: true },
-  { label: "Analise", icon: BarChart3 },
+  { label: "Crédito", icon: BadgeCheck, active: true },
+  { label: "Análise", icon: BarChart3 },
   { label: "Perfil", icon: User },
 ];
 
@@ -70,7 +70,7 @@ function decisionLabel(decision?: CreditDecision) {
   }
 
   if (decision === "MANUAL_REVIEW") {
-    return "Em analise";
+    return "Em análise";
   }
 
   if (decision === "REJECTED") {
@@ -125,10 +125,10 @@ export default function CreditScorePage() {
 
     return [
       {
-        title: "Frequencia de Renda",
+        title: "Frequência de Renda",
         rating: factorRating(incomeFrequency),
         description:
-          "Calculado a partir da recorrencia de entradas no periodo.",
+          "Calculado a partir da recorrência de entradas no período.",
         icon: CalendarDays,
         value: incomeFrequency,
       },
@@ -142,14 +142,14 @@ export default function CreditScorePage() {
       {
         title: "Controle de Gastos",
         rating: factorRating(spendingControl),
-        description: "Calculado pela relacao entre despesas e receitas.",
+        description: "Calculado pela relação entre despesas e receitas.",
         icon: WalletCards,
         value: spendingControl,
       },
       {
-        title: "Saldo Medio",
+        title: "Saldo Médio",
         rating: factorRating(balanceScore),
-        description: "Calculado a partir do saldo medio das contas conectadas.",
+        description: "Calculado a partir do saldo médio das contas conectadas.",
         icon: Banknote,
         value: balanceScore,
       },
@@ -195,7 +195,7 @@ export default function CreditScorePage() {
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
           >
             <Settings className="size-5" aria-hidden="true" />
-            Configuracoes
+            Configurações
           </a>
           <a
             href="/login"
@@ -215,7 +215,7 @@ export default function CreditScorePage() {
                 FluxCred
               </span>
               <h2 className="hidden font-mono text-lg font-semibold text-slate-600 md:block">
-                Analise de Score
+                Análise de Score
               </h2>
             </div>
 
@@ -233,7 +233,7 @@ export default function CreditScorePage() {
               <button
                 type="button"
                 className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
-                aria-label="Notificacoes"
+                aria-label="Notificações"
               >
                 <Bell className="size-5" aria-hidden="true" />
               </button>
@@ -249,7 +249,7 @@ export default function CreditScorePage() {
             <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 lg:col-span-12">
               {error instanceof Error
                 ? error.message
-                : "Nao foi possivel carregar."}
+                : "Não foi possível carregar."}
             </div>
           )}
 
@@ -277,7 +277,7 @@ export default function CreditScorePage() {
                     {decisionLabel(score?.decision)}
                   </span>
                   <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-300">
-                    Em analise
+                    Em análise
                   </span>
                   <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-300">
                     Negado
@@ -287,12 +287,12 @@ export default function CreditScorePage() {
                 <p className="mb-5 text-base text-slate-950">
                   {score
                     ? "Seu perfil financeiro foi analisado"
-                    : "Score ainda nao calculado"}
+                    : "Score ainda não calculado"}
                 </p>
                 <div className="rounded-lg border-l-4 border-[#007d82] bg-slate-100 p-5">
                   <p className="text-sm leading-7 text-[#506383]">
                     {score?.explanation ??
-                      "Conecte suas contas e calcule as metricas financeiras para gerar seu score de credito."}
+                      "Conecte suas contas e calcule as métricas financeiras para gerar seu score de crédito."}
                   </p>
                 </div>
               </div>
@@ -350,8 +350,8 @@ export default function CreditScorePage() {
                 </p>
                 <p className="mt-7 text-sm font-semibold leading-6">
                   {score
-                    ? `Baseado no seu score de ${score.score}, essa e a oferta disponivel no momento.`
-                    : "Calcule seu score para visualizar uma oferta de credito."}
+                    ? `Baseado no seu score de ${score.score}, essa é a oferta disponível no momento.`
+                    : "Calcule seu score para visualizar uma oferta de crédito."}
                 </p>
                 <Button
                   asChild
@@ -368,20 +368,20 @@ export default function CreditScorePage() {
 
             <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="mb-5 font-mono text-lg font-semibold text-slate-950">
-                Proximos Passos
+                Próximos Passos
               </h3>
               <div className="space-y-5">
                 {[
                   {
                     text: score
                       ? "Score calculado com dados financeiros reais"
-                      : "Calcule seu score de credito",
+                      : "Calcule seu score de crédito",
                     done: Boolean(score),
                   },
                   {
                     text: metric
-                      ? "Metricas financeiras disponiveis"
-                      : "Calcule suas metricas financeiras",
+                      ? "Métricas financeiras disponíveis"
+                      : "Calcule suas métricas financeiras",
                     done: Boolean(metric),
                   },
                   {

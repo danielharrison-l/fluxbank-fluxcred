@@ -10,7 +10,7 @@ export function Footer() {
             <a
               href="/"
               className="flex items-center gap-2 text-lg font-semibold"
-              aria-label="Pagina inicial FluxCred"
+              aria-label="Página inicial FluxCred"
             >
               <img
                 alt="FluxCred logo"
@@ -22,8 +22,8 @@ export function Footer() {
               <span className="text-xl">FluxCred</span>
             </a>
             <p className="mt-3 text-muted-foreground">
-              Credito sob medida com Open Finance, score transparente e
-              solicitacao digital.
+              Crédito sob medida com Open Finance, score transparente e
+              solicitação digital.
             </p>
           </div>
           <div className="col-span-1">

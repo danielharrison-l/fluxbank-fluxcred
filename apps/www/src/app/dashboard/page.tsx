@@ -35,18 +35,18 @@ const navItems = [
     icon: LayoutDashboard,
     active: true,
   },
-  { label: "Transacoes", href: "/dashboard", icon: ReceiptText },
-  { label: "Analise", href: "/dashboard", icon: BarChart3 },
-  { label: "Score de Credito", href: "/credit-score", icon: Gauge },
-  { label: "Solicitar Credito", href: "/credit-request", icon: CreditCard },
-  { label: "Instituicoes", href: "/connect-accounts", icon: Building2 },
+  { label: "Transações", href: "/dashboard", icon: ReceiptText },
+  { label: "Análise", href: "/dashboard", icon: BarChart3 },
+  { label: "Score de Crédito", href: "/credit-score", icon: Gauge },
+  { label: "Solicitar Crédito", href: "/credit-request", icon: CreditCard },
+  { label: "Instituições", href: "/connect-accounts", icon: Building2 },
 ];
 
 const bottomNavItems = [
   { label: "Home", icon: Home, active: true },
   { label: "Atividade", icon: List },
   { label: "Solicitar", icon: CirclePlus, primary: true },
-  { label: "Analise", icon: BarChart3 },
+  { label: "Análise", icon: BarChart3 },
   { label: "Perfil", icon: User },
 ];
 
@@ -112,7 +112,7 @@ export default function DashboardPage() {
           <h1 className="font-mono text-2xl font-bold text-[#00766d]">
             FluxCred
           </h1>
-          <p className="text-xs text-slate-500">Financas modernas</p>
+          <p className="text-xs text-slate-500">Finanças modernas</p>
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -141,14 +141,14 @@ export default function DashboardPage() {
             asChild
             className="h-12 w-full rounded-xl bg-[#005f66] font-bold text-white hover:bg-[#004f56]"
           >
-            <a href="/credit-request">Solicitar credito</a>
+            <a href="/credit-request">Solicitar crédito</a>
           </Button>
           <a
             href="/dashboard"
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
           >
             <Settings className="size-5" aria-hidden="true" />
-            Configuracoes
+            Configurações
           </a>
           <a
             href="/login"
@@ -186,7 +186,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 className="relative flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
-                aria-label="Notificacoes"
+                aria-label="Notificações"
               >
                 <Bell className="size-5" aria-hidden="true" />
                 <span className="absolute right-2 top-2 size-2 rounded-full bg-red-500 ring-2 ring-white" />
@@ -210,7 +210,7 @@ export default function DashboardPage() {
             <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               {error instanceof Error
                 ? error.message
-                : "Nao foi possivel carregar."}
+                : "Não foi possível carregar."}
             </div>
           )}
 
@@ -241,7 +241,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 divide-x divide-slate-100">
                 <div className="pr-4">
                   <p className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
-                    Entradas do Periodo
+                    Entradas do Período
                   </p>
                   <h4 className="font-mono text-2xl font-semibold text-slate-950">
                     {formatCurrency(dashboard?.totalIncome)}
@@ -249,7 +249,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="pl-4">
                   <p className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
-                    Saidas do Periodo
+                    Saídas do Período
                   </p>
                   <h4 className="font-mono text-2xl font-semibold text-red-600">
                     {formatCurrency(dashboard?.totalExpense)}
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                   />
                 </div>
                 <p className="mt-2 text-[10px] text-[#506383]">
-                  {Math.round(budgetRemaining)}% do orcamento mensal restante
+                  {Math.round(budgetRemaining)}% do orçamento mensal restante
                 </p>
               </div>
             </article>
@@ -365,7 +365,7 @@ export default function DashboardPage() {
                   type="button"
                   className="mt-4 flex items-center gap-1 text-xs font-bold text-[#006d77] hover:underline"
                 >
-                  Analisar liquidacao
+                  Analisar liquidação
                   <ChevronRight className="size-4" aria-hidden="true" />
                 </button>
               </article>
@@ -374,20 +374,20 @@ export default function DashboardPage() {
             <section className="space-y-4 lg:col-span-2">
               <div className="flex items-center justify-between">
                 <h3 className="font-mono text-xl font-semibold text-slate-950">
-                  Transacoes Recentes
+                  Transações Recentes
                 </h3>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     className="flex size-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-                    aria-label="Filtrar transacoes"
+                    aria-label="Filtrar transações"
                   >
                     <Filter className="size-4" aria-hidden="true" />
                   </button>
                   <button
                     type="button"
                     className="flex size-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-                    aria-label="Baixar transacoes"
+                    aria-label="Baixar transações"
                   >
                     <ArrowDownToLine className="size-4" aria-hidden="true" />
                   </button>
@@ -403,7 +403,7 @@ export default function DashboardPage() {
                           Data
                         </th>
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
-                          Descricao
+                          Descrição
                         </th>
                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
                           Categoria
@@ -468,7 +468,7 @@ export default function DashboardPage() {
                             className="px-6 py-8 text-center text-sm text-[#506383]"
                             colSpan={4}
                           >
-                            Nenhuma transacao sincronizada ainda.
+                            Nenhuma transação sincronizada ainda.
                           </td>
                         </tr>
                       )}

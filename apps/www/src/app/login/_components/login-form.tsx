@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { apiBaseUrl, parseJsonResponse } from "@/lib/api";
+import { getApiBaseUrl, parseJsonResponse } from "@/lib/api";
 
 type AuthFormMode = "login" | "register";
 
@@ -35,6 +35,7 @@ export function LoginForm({
     setErrorMessage(null);
 
     const formData = new FormData(event.currentTarget);
+    const apiBaseUrl = getApiBaseUrl();
     const payload = {
       name: String(formData.get("name") ?? "").trim(),
       email: String(formData.get("email") ?? "")
@@ -70,7 +71,7 @@ export function LoginForm({
             ? data.message
             : Array.isArray(data?.message)
               ? data.message.join(", ")
-            : "Nao foi possivel criar sua conta.";
+            : "Não foi possível criar sua conta.";
         throw new Error(
           message === "Email already registered"
             ? "Este e-mail ja esta cadastrado."
@@ -81,7 +82,7 @@ export function LoginForm({
       const data = await parseJsonResponse<{ accessToken?: string }>(response);
 
       if (!data?.accessToken) {
-        throw new Error("A API nao retornou o token de acesso.");
+        throw new Error("A API não retornou o token de acesso.");
       }
 
       window.localStorage.setItem("accessToken", data.accessToken);
@@ -91,7 +92,7 @@ export function LoginForm({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Nao foi possivel criar sua conta.",
+          : "Não foi possível criar sua conta.",
       );
     } finally {
       setIsSubmitting(false);
@@ -113,8 +114,8 @@ export function LoginForm({
           </h1>
           <p className="text-base leading-7 text-[#3e494a]">
             {isLogin
-              ? "Acesse sua analise de credito, contas conectadas e solicitacoes."
-              : "Cadastre seus dados para iniciar sua analise de credito com Open Finance."}
+              ? "Acesse sua análise de crédito, contas conectadas e solicitações."
+              : "Cadastre seus dados para iniciar sua análise de crédito com Open Finance."}
           </p>
         </div>
 
@@ -207,7 +208,7 @@ export function LoginForm({
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder={isLogin ? "Sua senha" : "Minimo de 8 caracteres"}
+                placeholder={isLogin ? "Sua senha" : "Mínimo de 8 caracteres"}
                 autoComplete={isLogin ? "current-password" : "new-password"}
                 className="h-12 rounded-lg border-[#bec8ca] bg-[#f1f4f4] px-4 pr-12 text-base shadow-none focus-visible:ring-primary"
               />
@@ -247,8 +248,8 @@ export function LoginForm({
                 className="mt-1 size-4 rounded border-[#9fb3b5] text-primary focus:ring-primary"
               />
               <span>
-                Aceito os termos de uso e autorizo a analise dos dados
-                informados para avaliacao de credito.
+                Aceito os termos de uso e autorizo a análise dos dados
+                informados para avaliação de crédito.
               </span>
             </label>
           )}
@@ -259,8 +260,8 @@ export function LoginForm({
               aria-hidden="true"
             />
             <p className="text-sm leading-6 text-[#3e494a]">
-              Seus dados sao protegidos e usados apenas para melhorar sua
-              analise de credito.
+              Seus dados são protegidos e usados apenas para melhorar sua
+              análise de crédito.
             </p>
           </div>
 
@@ -286,7 +287,7 @@ export function LoginForm({
 
         <div className="space-y-4 border-t border-[#d7e0e1] pt-5 text-center">
           <p className="text-sm text-[#3e494a]">
-            {isLogin ? "Ainda nao tem conta?" : "Ja tem uma conta?"}{" "}
+            {isLogin ? "Ainda não tem conta?" : "Já tem uma conta?"}{" "}
             <Link
               to={isLogin ? "/register?view=form" : "/login?view=form"}
               className="font-semibold text-primary hover:underline"

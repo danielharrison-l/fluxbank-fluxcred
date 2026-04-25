@@ -10,8 +10,8 @@ import { Link } from "react-router-dom";
 const items = [
   { label: "Home", href: "#", icon: Home, active: true },
   { label: "Extrato", href: "#", icon: ListChecks },
-  { label: "Analise", href: "#", icon: ChartNoAxesColumn },
-  { label: "Credito", href: "#", icon: WalletCards },
+  { label: "Análise", href: "#", icon: ChartNoAxesColumn },
+  { label: "Crédito", href: "#", icon: WalletCards },
   { label: "Perfil", href: "#", icon: User },
 ];
 

@@ -1,5 +1,66 @@
-export const apiBaseUrl =
-  import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+const configuredApiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
+
+function isLoopbackOrPrivateHost(hostname: string) {
+  if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname.endsWith(".local")
+  ) {
+    return true;
+  }
+
+  if (/^10\./.test(hostname) || /^192\.168\./.test(hostname)) {
+    return true;
+  }
+
+  const match = hostname.match(/^172\.(\d{1,3})\./);
+
+  if (!match) {
+    return false;
+  }
+
+  const secondOctet = Number(match[1]);
+
+  return secondOctet >= 16 && secondOctet <= 31;
+}
+
+function isLocalDevelopmentHost(hostname: string) {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+}
+
+export function getApiBaseUrl() {
+  if (typeof window === "undefined") {
+    return configuredApiBaseUrl ?? "";
+  }
+
+  if (!configuredApiBaseUrl) {
+    if (isLocalDevelopmentHost(window.location.hostname)) {
+      return "http://localhost:3000";
+    }
+
+    throw new Error(
+      "VITE_API_URL não foi configurada para este ambiente.",
+    );
+  }
+
+  if (/^\//.test(configuredApiBaseUrl)) {
+    return configuredApiBaseUrl;
+  }
+
+  const apiUrl = new URL(configuredApiBaseUrl);
+
+  if (
+    !isLocalDevelopmentHost(window.location.hostname) &&
+    isLoopbackOrPrivateHost(apiUrl.hostname)
+  ) {
+    throw new Error(
+      "VITE_API_URL aponta para localhost ou rede privada. Use o domínio público da API.",
+    );
+  }
+
+  return configuredApiBaseUrl;
+}
 
 export function getAccessToken() {
   if (typeof window === "undefined") {
@@ -25,9 +86,10 @@ export async function parseJsonResponse<T>(response: Response) {
 
 export async function apiRequest<T>(path: string, init?: RequestInit) {
   const accessToken = getAccessToken();
+  const apiBaseUrl = getApiBaseUrl();
 
   if (!accessToken) {
-    throw new Error("Faca login para continuar.");
+    throw new Error("Faça login para continuar.");
   }
 
   const response = await fetch(`${apiBaseUrl}${path}`, {
@@ -48,7 +110,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit) {
         ? data.message
         : Array.isArray(data?.message)
           ? data.message.join(", ")
-        : "Nao foi possivel concluir a requisicao.";
+        : "Não foi possível concluir a requisição.";
     throw new Error(message);
   }
 

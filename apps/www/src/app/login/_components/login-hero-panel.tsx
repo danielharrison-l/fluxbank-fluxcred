@@ -6,13 +6,13 @@ import { BrandMark } from "./brand-mark";
 const highlights = [
   {
     title: "Cadastro simples",
-    description: "Poucos dados para começar sua avaliacao com clareza.",
+    description: "Poucos dados para começar sua avaliação com clareza.",
     icon: BriefcaseBusiness,
   },
   {
     title: "Open Finance humano",
     description:
-      "Sua movimentacao ajuda a provar seu potencial com menos burocracia.",
+      "Sua movimentação ajuda a provar seu potencial com menos burocracia.",
     icon: ShieldCheck,
   },
 ];
@@ -42,7 +42,7 @@ export function LoginHeroPanel() {
           </h1>
           <p className="text-base leading-7 text-white/88 lg:text-lg lg:leading-8">
             Informe seus dados, conecte suas contas quando quiser e acompanhe
-            uma analise de credito feita para autonomos e profissionais
+            uma análise de crédito feita para autônomos e profissionais
             liberais.
           </p>
         </div>

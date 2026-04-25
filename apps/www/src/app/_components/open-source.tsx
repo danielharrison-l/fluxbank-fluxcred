@@ -4,27 +4,27 @@ import { Button } from "@/components/ui/button";
 const technology = [
   {
     icon: Eye,
-    title: "Transparencia",
+    title: "Transparência",
     description:
-      "Mostramos os fatores que influenciam o score para orientar decisoes melhores.",
+      "Mostramos os fatores que influenciam o score para orientar decisões melhores.",
   },
   {
     icon: Code2,
     title: "API integrada",
     description:
-      "O dashboard consome dados reais da API para contas, transacoes, score e solicitacoes.",
+      "O dashboard consome dados reais da API para contas, transações, score e solicitações.",
   },
   {
     icon: Users,
-    title: "Foco no usuario",
+    title: "Foco no usuário",
     description:
-      "A experiencia foi pensada para quem precisa de credito com menos burocracia.",
+      "A experiência foi pensada para quem precisa de crédito com menos burocracia.",
   },
   {
     icon: Puzzle,
     title: "Open Finance",
     description:
-      "Conexao segura com instituicoes financeiras para enriquecer a analise.",
+      "Conexão segura com instituições financeiras para enriquecer a análise.",
   },
 ];
 
@@ -36,7 +36,7 @@ export function OpenSource() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div className="flex flex-col">
               <h2 className="mb-6 text-center text-balance text-3xl font-bold sm:text-4xl lg:text-left">
-                Tecnologia para uma analise mais justa
+                Tecnologia para uma análise mais justa
               </h2>
               <p className="mb-8 text-center text-lg leading-relaxed text-muted-foreground lg:text-left">
                 Com dados financeiros autorizados, a FluxCred consegue avaliar
@@ -66,7 +66,7 @@ export function OpenSource() {
               >
                 <a href="/register?view=form" className="flex items-center gap-2">
                   <CodeXml className="h-4 w-4" />
-                  Comecar agora
+                  Começar agora
                 </a>
               </Button>
             </div>
@@ -91,8 +91,8 @@ export function OpenSource() {
                       <span className="text-yellow-400">calcularScore</span>
                       ({"{"}
                       {"\n  "}renda: "recorrente",
-                      {"\n  "}gastos: "saudaveis",
-                      {"\n  "}saldo: "estavel"
+                      {"\n  "}gastos: "saudáveis",
+                      {"\n  "}saldo: "estável"
                       {"\n}"}){"\n\n"}
                       <span className="text-purple-400">await</span> credito.
                       <span className="text-yellow-400">solicitar</span>({"{"}

@@ -12,15 +12,15 @@ export function Hero() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-chart-2"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
           </span>
-          Analise de credito com dados reais do Open Finance
+          Análise de crédito com dados reais do Open Finance
         </div>
         <div className="flex max-w-5xl flex-col items-center gap-6">
           <h1 className="text-balance text-5xl font-bold leading-tight tracking-tight text-foreground md:text-7xl lg:text-8xl">
-            Credito mais justo para quem trabalha por conta propria
+            Crédito mais justo para quem trabalha por conta própria
           </h1>
           <p className="max-w-2xl text-balance text-lg leading-relaxed text-muted-foreground md:text-xl">
             Conecte suas contas, gere seu score e solicite credito com uma
-            analise baseada no seu fluxo financeiro real.
+            análise baseada no seu fluxo financeiro real.
           </p>
           <div className="flex flex-col items-center gap-4 pt-5 sm:flex-row">
             <Button asChild size="lg">

@@ -27,18 +27,18 @@ import { apiRequest, formatCurrency, formatDate } from "@/lib/api";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Transacoes", icon: ReceiptText },
-  { label: "Analise", icon: BarChart3 },
-  { label: "Score de Credito", icon: Gauge },
-  { label: "Solicitar Credito", icon: WalletCards, active: true },
-  { label: "Instituicoes", icon: Building2 },
+  { label: "Transações", icon: ReceiptText },
+  { label: "Análise", icon: BarChart3 },
+  { label: "Score de Crédito", icon: Gauge },
+  { label: "Solicitar Crédito", icon: WalletCards, active: true },
+  { label: "Instituições", icon: Building2 },
 ];
 
 const bottomNavItems = [
   { label: "Home", icon: Home },
   { label: "Atividade", icon: List },
-  { label: "Analise", icon: BarChart3 },
-  { label: "Credito", icon: BadgeCheck, active: true },
+  { label: "Análise", icon: BarChart3 },
+  { label: "Crédito", icon: BadgeCheck, active: true },
   { label: "Perfil", icon: User },
 ];
 
@@ -59,7 +59,7 @@ type CreditRequest = {
 function statusView(status: CreditRequest["status"]) {
   if (status === "APPROVED") {
     return {
-      title: "Credito Aprovado",
+      title: "Crédito Aprovado",
       icon: CheckCircle2,
       className: "border-emerald-200 bg-emerald-50 text-emerald-700",
     };
@@ -67,14 +67,14 @@ function statusView(status: CreditRequest["status"]) {
 
   if (status === "REVIEW" || status === "REQUESTED") {
     return {
-      title: "Em Analise",
+      title: "Em Análise",
       icon: Clock,
       className: "border-amber-200 bg-amber-50 text-amber-700",
     };
   }
 
   return {
-    title: status === "CANCELLED" ? "Cancelado" : "Credito Negado",
+    title: status === "CANCELLED" ? "Cancelado" : "Crédito Negado",
     icon: Info,
     className: "border-red-200 bg-red-50 text-red-700",
   };
@@ -194,7 +194,7 @@ export default function CreditRequestPage() {
               FluxCred
             </h2>
             <p className="text-xs font-medium text-slate-500">
-              Financas modernas
+              Finanças modernas
             </p>
           </div>
 
@@ -225,7 +225,7 @@ export default function CreditRequestPage() {
               className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#00766d]"
             >
               <Settings className="size-5" aria-hidden="true" />
-              Configuracoes
+              Configurações
             </a>
             <a
               href="/login"
@@ -247,7 +247,7 @@ export default function CreditRequestPage() {
 
             <div>
               <h1 className="font-mono text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">
-                Solicitar Credito
+                Solicitar Crédito
               </h1>
               <p className="mt-2 max-w-xl text-base leading-7 text-[#506383]">
                 Solicite financiamento com as melhores taxas do mercado
@@ -259,10 +259,10 @@ export default function CreditRequestPage() {
               <div className="grid gap-6 md:grid-cols-[1fr_auto]">
                 <div>
                   <span className="mb-5 inline-flex rounded-full bg-[#d9fbf5] px-4 py-2 text-[11px] font-bold text-[#00766d]">
-                    Simulacao de Credito
+                    Simulação de Crédito
                   </span>
                   <h2 className="max-w-[220px] font-mono text-2xl font-semibold leading-tight text-slate-950">
-                    Quanto voce precisa?
+                    Quanto você precisa?
                   </h2>
                 </div>
 
@@ -312,7 +312,7 @@ export default function CreditRequestPage() {
 
                 <p className="flex items-start gap-2 text-xs leading-5 text-[#506383]">
                   <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                  O valor solicitado sera analisado em ate 24 horas uteis.
+                  O valor solicitado será analisado em até 24 horas úteis.
                 </p>
 
                 <Button
@@ -322,14 +322,14 @@ export default function CreditRequestPage() {
                   <CircleDollarSign className="size-5" aria-hidden="true" />
                   {createCreditRequest.isPending
                     ? "Solicitando..."
-                    : "Solicitar credito"}
+                    : "Solicitar crédito"}
                 </Button>
               </form>
             </section>
 
             <section className="space-y-4">
               <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-[#8a9ab2]">
-                Historico de solicitacoes
+                Histórico de solicitações
               </h2>
 
               <div className="space-y-4">
@@ -365,7 +365,7 @@ export default function CreditRequestPage() {
                 })}
                 {!isLoading && requests.length === 0 && (
                   <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-sm text-[#506383]">
-                    Nenhuma solicitacao de credito registrada ainda.
+                    Nenhuma solicitação de crédito registrada ainda.
                   </div>
                 )}
               </div>

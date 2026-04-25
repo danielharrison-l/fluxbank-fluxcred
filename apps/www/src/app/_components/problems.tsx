@@ -3,27 +3,27 @@ import { AlertCircle, FolderX, Layers, Link2Off } from "lucide-react";
 const problems = [
   {
     icon: AlertCircle,
-    title: "Credito pouco personalizado",
+    title: "Crédito pouco personalizado",
     description:
-      "Analises tradicionais ignoram parte importante do fluxo financeiro de autonomos e profissionais liberais.",
+      "Análises tradicionais ignoram parte importante do fluxo financeiro de autônomos e profissionais liberais.",
   },
   {
     icon: FolderX,
     title: "Dados espalhados",
     description:
-      "Contas, saldos e transacoes ficam em bancos diferentes, dificultando uma avaliacao rapida.",
+      "Contas, saldos e transações ficam em bancos diferentes, dificultando uma avaliação rápida.",
   },
   {
     icon: Layers,
     title: "Processos lentos",
     description:
-      "Solicitacoes manuais pedem documentos demais e atrasam a resposta para quem precisa de credito.",
+      "Solicitações manuais pedem documentos demais e atrasam a resposta para quem precisa de crédito.",
   },
   {
     icon: Link2Off,
     title: "Pouca visibilidade",
     description:
-      "Sem clareza dos fatores de risco, fica dificil entender como melhorar o proprio score.",
+      "Sem clareza dos fatores de risco, fica difícil entender como melhorar o próprio score.",
   },
 ];
 
@@ -33,11 +33,11 @@ export function Problems() {
       <div className="container mx-auto">
         <div className="mx-auto mb-10 max-w-3xl text-center lg:mb-16">
           <h2 className="mb-4 text-balance text-3xl font-bold sm:text-4xl">
-            O desafio do credito para autonomos
+            O desafio do crédito para autônomos
           </h2>
           <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
             A FluxCred usa dados autorizados via Open Finance para reduzir
-            incerteza e gerar uma avaliacao mais completa.
+            incerteza e gerar uma avaliação mais completa.
           </p>
         </div>
 
