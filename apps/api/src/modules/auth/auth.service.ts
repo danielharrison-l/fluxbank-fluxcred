@@ -1,3 +1,4 @@
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import {
   BadRequestException,
   Injectable,
@@ -6,7 +7,6 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import { createHash, randomBytes } from "node:crypto";
 import { MailService } from "@/modules/mail/mail.service";
 import { UsersService } from "@/modules/users/users.service";
 import { LoginDto } from "./dto/login.dto";
@@ -231,7 +231,7 @@ export class AuthService {
       passwordResetTokenHash: null,
       passwordResetTokenExpiresAt: null,
     });
-    await this.clearRefreshSession(user.id);
+    await this.usersService.deleteRefreshSessionsByUser(user.id);
 
     return {
       success: true,
@@ -244,7 +244,7 @@ export class AuthService {
       throw new UnauthorizedException("Refresh token missing");
     }
 
-    let payload: { sub: string; email: string };
+    let payload: { sub: string; email: string; sid?: string };
 
     try {
       payload = await this.jwtService.verifyAsync(refreshToken, {
@@ -254,23 +254,31 @@ export class AuthService {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
-    const user = await this.usersService.findById(payload.sub);
-
-    if (!user?.refreshTokenHash || !user.refreshTokenExpiresAt) {
-      throw new UnauthorizedException("Refresh session not found");
-    }
-
-    if (user.refreshTokenExpiresAt.getTime() <= Date.now()) {
-      await this.clearRefreshSession(user.id);
-      throw new UnauthorizedException("Refresh token expired");
-    }
-
-    if (user.refreshTokenHash !== this.hashToken(refreshToken)) {
-      await this.clearRefreshSession(user.id);
+    if (!payload.sid) {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
-    return this.buildAuthResponse(user);
+    const refreshSession = await this.usersService.findRefreshSession(
+      payload.sid,
+    );
+
+    if (!refreshSession || refreshSession.userId !== payload.sub) {
+      throw new UnauthorizedException("Refresh session not found");
+    }
+
+    if (refreshSession.expiresAt.getTime() <= Date.now()) {
+      await this.clearRefreshSession(refreshSession.id);
+      throw new UnauthorizedException("Refresh token expired");
+    }
+
+    if (refreshSession.tokenHash !== this.hashToken(refreshToken)) {
+      await this.clearRefreshSession(refreshSession.id);
+      throw new UnauthorizedException("Invalid refresh token");
+    }
+
+    await this.clearRefreshSession(refreshSession.id);
+
+    return this.buildAuthResponse(refreshSession.user);
   }
 
   async logout(refreshToken: string | undefined) {
@@ -282,11 +290,14 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync<{
         sub: string;
         email: string;
+        sid?: string;
       }>(refreshToken, {
         secret: this.refreshTokenSecret,
       });
 
-      await this.clearRefreshSession(payload.sub);
+      if (payload.sid) {
+        await this.clearRefreshSession(payload.sid);
+      }
     } catch {
       return;
     }
@@ -339,10 +350,15 @@ export class AuthService {
       },
     );
 
+    const refreshSessionId = randomUUID();
+    const refreshTokenExpiresAt = new Date(
+      Date.now() + this.parseDurationToMs(this.refreshTokenTtl),
+    );
     const refreshToken = await this.jwtService.signAsync(
       {
         sub: user.id,
         email: user.email,
+        sid: refreshSessionId,
         nonce: randomBytes(12).toString("hex"),
       },
       {
@@ -353,11 +369,10 @@ export class AuthService {
       },
     );
 
-    await this.usersService.updateRefreshSession(user.id, {
-      refreshTokenHash: this.hashToken(refreshToken),
-      refreshTokenExpiresAt: new Date(
-        Date.now() + this.parseDurationToMs(this.refreshTokenTtl),
-      ),
+    await this.usersService.createRefreshSession(user.id, {
+      id: refreshSessionId,
+      tokenHash: this.hashToken(refreshToken),
+      expiresAt: refreshTokenExpiresAt,
     });
 
     return {
@@ -367,11 +382,8 @@ export class AuthService {
     };
   }
 
-  private async clearRefreshSession(userId: string) {
-    await this.usersService.updateRefreshSession(userId, {
-      refreshTokenHash: null,
-      refreshTokenExpiresAt: null,
-    });
+  private async clearRefreshSession(sessionId: string) {
+    await this.usersService.deleteRefreshSession(sessionId);
   }
 
   private hashToken(token: string) {

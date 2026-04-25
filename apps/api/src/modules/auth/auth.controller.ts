@@ -31,9 +31,7 @@ export class AuthController {
   @Post("register")
   @ApiOperation({ summary: "Register a user" })
   @ApiResponse({ status: 201, description: "User registered" })
-  async register(
-    @Body() data: RegisterDto,
-  ) {
+  async register(@Body() data: RegisterDto) {
     return this.authService.register(data);
   }
 
@@ -67,8 +65,11 @@ export class AuthController {
 
     this.writeRefreshCookie(response, authResult.refreshToken);
 
-    const { refreshToken: _refreshToken, user: _user, ...authResponse } =
-      authResult;
+    const {
+      refreshToken: _refreshToken,
+      user: _user,
+      ...authResponse
+    } = authResult;
     return authResponse;
   }
 

@@ -95,6 +95,43 @@ export class UsersService {
     });
   }
 
+  async createRefreshSession(
+    userId: string,
+    data: {
+      id: string;
+      tokenHash: string;
+      expiresAt: Date;
+    },
+  ) {
+    return this.prisma.refreshSession.create({
+      data: {
+        id: data.id,
+        userId,
+        tokenHash: data.tokenHash,
+        expiresAt: data.expiresAt,
+      },
+    });
+  }
+
+  async findRefreshSession(id: string) {
+    return this.prisma.refreshSession.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+  }
+
+  async deleteRefreshSession(id: string) {
+    await this.prisma.refreshSession.deleteMany({
+      where: { id },
+    });
+  }
+
+  async deleteRefreshSessionsByUser(userId: string) {
+    await this.prisma.refreshSession.deleteMany({
+      where: { userId },
+    });
+  }
+
   async updateEmailVerification(
     userId: string,
     data: {
