@@ -167,7 +167,7 @@ export default function ProfilePage() {
     queryFn: async () => {
       const [user, pluggyItems] = await Promise.all([
         apiRequest<UserProfile | null>("/users/me"),
-        apiRequest<PluggyItem[]>("/pluggy/items"),
+        apiRequest<PluggyItem[]>("/demo/items"),
       ]);
 
       return {

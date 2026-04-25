@@ -314,6 +314,15 @@ export class AuthService {
     } as const;
   }
 
+  getRefreshCookieClearOptions() {
+    return {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/auth",
+    } as const;
+  }
+
   private async buildAuthResponse(user: AuthenticatedUser) {
     const {
       passwordHash: _passwordHash,

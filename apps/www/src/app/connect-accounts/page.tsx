@@ -135,7 +135,7 @@ export default function ConnectAccountsPage() {
   const apiRequest = useCallback(authenticatedApiRequest, []);
 
   useEffect(() => {
-    apiRequest<DemoItem[]>("/pluggy/items")
+    apiRequest<DemoItem[]>("/demo/items")
       .then((items) => {
         const [item] = items;
 
@@ -541,7 +541,8 @@ export default function ConnectAccountsPage() {
                     </p>
                     <p className="mb-6 text-xs leading-6 text-white/85">
                       Cada perfil gera uma massa de dados completa para validar
-                      a experiência sem depender de uma conta real do Pluggy.
+                      a experiência sem depender de uma integração bancária
+                      real.
                     </p>
 
                     <ul className="space-y-4 text-xs font-medium">

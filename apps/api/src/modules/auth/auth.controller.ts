@@ -83,7 +83,7 @@ export class AuthController {
     await this.authService.logout(this.readRefreshCookie(request));
     response.clearCookie(
       this.authService.getRefreshCookieName(),
-      this.authService.getRefreshCookieOptions(),
+      this.authService.getRefreshCookieClearOptions(),
     );
 
     return { success: true };

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@/infra/database/prisma.service";
 import { ListAccountsQueryDto } from "./dto/list-accounts-query.dto";
 
@@ -16,9 +16,15 @@ export class AccountsService {
     });
   }
 
-  findById(userId: string, id: string) {
-    return this.prisma.financialAccount.findFirst({
+  async findById(userId: string, id: string) {
+    const account = await this.prisma.financialAccount.findFirst({
       where: { id, userId },
     });
+
+    if (!account) {
+      throw new NotFoundException("Account not found");
+    }
+
+    return account;
   }
 }

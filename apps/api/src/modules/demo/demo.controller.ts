@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import { JwtAuthGuard } from "@/modules/auth/guards/jwt-auth.guard";
 import { DemoService } from "./demo.service";
@@ -10,6 +10,11 @@ type AuthenticatedRequest = Request & { user: { id: string } };
 @UseGuards(JwtAuthGuard)
 export class DemoController {
   constructor(private readonly demoService: DemoService) {}
+
+  @Get("items")
+  listItems(@Req() request: AuthenticatedRequest) {
+    return this.demoService.listItems(request.user.id);
+  }
 
   @Post("connect")
   connect(

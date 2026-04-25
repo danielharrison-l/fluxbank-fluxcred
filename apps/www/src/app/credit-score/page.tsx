@@ -43,7 +43,7 @@ const bottomNavItems = [
   { label: "Perfil", icon: User },
 ];
 
-type CreditDecision = "APPROVED" | "MANUAL_REVIEW" | "REJECTED";
+type CreditDecision = "APPROVED" | "REJECTED";
 
 type CreditScore = {
   score: number;
@@ -69,7 +69,7 @@ function decisionLabel(decision?: CreditDecision) {
     return "Aprovado";
   }
 
-  if (decision === "REJECTED" || decision === "MANUAL_REVIEW") {
+  if (decision === "REJECTED") {
     return "Negado";
   }
 
@@ -97,7 +97,7 @@ function getDecisionBadgeClassName(decision?: CreditDecision) {
     return "bg-emerald-100 text-emerald-700";
   }
 
-  if (decision === "REJECTED" || decision === "MANUAL_REVIEW") {
+  if (decision === "REJECTED") {
     return "bg-red-100 text-red-700";
   }
 

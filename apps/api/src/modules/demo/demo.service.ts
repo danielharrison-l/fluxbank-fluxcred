@@ -263,6 +263,13 @@ export class DemoService {
     };
   }
 
+  listItems(userId: string) {
+    return this.prisma.pluggyItem.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   async reset(userId: string) {
     this.assertEnabled();
 

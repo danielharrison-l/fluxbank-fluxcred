@@ -20,6 +20,14 @@ cp apps/www/.env.example apps/www/.env
 
 O arquivo `apps/api/.env` nao deve ser commitado.
 
+## Documentacao da Solucao
+
+- [Documento da Solucao](docs/solution.md)
+- [Diagrama de Arquitetura](docs/architecture-diagram.mmd)
+- [Melhorias Futuras](docs/future-improvements.md)
+
+O documento da solucao tambem descreve a infraestrutura usada para deploy: VPS na Hostinger, Dokploy autohospedado, Traefik como proxy reverso, DNS pela Cloudflare e envio de email com Resend.
+
 ### API
 
 Variaveis principais:
@@ -51,7 +59,7 @@ Variaveis opcionais:
 - `ENABLE_API_DOCS=false`: desativa Swagger, OpenAPI JSON e Scalar.
 - `ENABLE_DEMO_CONNECTIONS=false`: desativa conexoes demo.
 
-Nao e necessario configurar variaveis da Pluggy neste momento.
+Nao e necessario configurar integracao bancaria externa neste momento.
 
 ### Frontend
 

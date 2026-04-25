@@ -62,7 +62,7 @@ type CreditRequest = {
   id: string;
   requestedAmount: number | string;
   approvedAmount?: number | string | null;
-  status: "REQUESTED" | "APPROVED" | "REVIEW" | "REJECTED" | "CANCELLED";
+  status: "APPROVED" | "REJECTED";
   requestedAt: string;
   explanation?: string;
   monthlyInterestRate?: number | null;

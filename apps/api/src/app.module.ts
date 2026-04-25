@@ -10,7 +10,6 @@ import { CreditScoreModule } from "./modules/credit-score/credit-score.module";
 import { DashboardModule } from "./modules/dashboard/dashboard.module";
 import { DemoModule } from "./modules/demo/demo.module";
 import { FinancialMetricsModule } from "./modules/financial-metrics/financial-metrics.module";
-import { PluggyModule } from "./modules/pluggy/pluggy.module";
 import { TransactionsModule } from "./modules/transactions/transactions.module";
 import { UsersModule } from "./modules/users/users.module";
 
@@ -22,7 +21,6 @@ import { UsersModule } from "./modules/users/users.module";
     PrismaModule,
     AuthModule,
     UsersModule,
-    PluggyModule,
     AccountsModule,
     TransactionsModule,
     DashboardModule,
