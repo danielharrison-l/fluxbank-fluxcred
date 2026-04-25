@@ -18,6 +18,10 @@ RUN pnpm install --frozen-lockfile
 COPY apps/api apps/api
 COPY packages packages
 
+# Generate Prisma Client before TypeScript compilation. The dummy URL is only
+# needed because prisma.config.ts reads DATABASE_URL while generating types.
+RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fluxcred?schema=public" pnpm --dir apps/api prisma generate
+
 # Build the api (outputs to apps/api/dist)
 RUN pnpm turbo build --filter=api
 
