@@ -34,6 +34,7 @@ RUN set -eux; \
   cp -R "$prisma_source" "$prisma_node_modules_dir/.prisma"
 RUN mkdir -p /out/prisma \
   && cp apps/api/prisma/schema.prisma /out/prisma/schema.prisma \
+  && cp -R apps/api/prisma/migrations /out/prisma/migrations \
   && cp apps/api/prisma.config.ts /out/prisma.config.ts
 
 
@@ -47,7 +48,7 @@ RUN apk add --no-cache curl
 
 COPY --from=builder /out ./
 
-CMD ["node", "dist/src/main.js"]
+CMD ["sh", "-c", "./node_modules/.bin/prisma --config=./prisma.config.ts migrate deploy && node dist/src/main.js"]
 
 
 
