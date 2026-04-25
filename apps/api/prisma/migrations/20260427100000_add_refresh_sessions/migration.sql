@@ -4,7 +4,7 @@ CREATE TABLE "refresh_sessions" (
   "token_hash" TEXT NOT NULL,
   "expires_at" TIMESTAMP(3) NOT NULL,
   "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMP(3) NOT NULL,
 
   CONSTRAINT "refresh_sessions_pkey" PRIMARY KEY ("id")
 );
