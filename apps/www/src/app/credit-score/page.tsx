@@ -92,6 +92,18 @@ function factorRating(value: number) {
   return "Baixo";
 }
 
+function getDecisionBadgeClassName(decision?: CreditDecision) {
+  if (decision === "APPROVED") {
+    return "bg-emerald-100 text-emerald-700";
+  }
+
+  if (decision === "REJECTED" || decision === "MANUAL_REVIEW") {
+    return "bg-red-100 text-red-700";
+  }
+
+  return "bg-slate-100 text-slate-500";
+}
+
 export default function CreditScorePage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["credit-score-page"],
@@ -153,7 +165,11 @@ export default function CreditScorePage() {
   }, [metric]);
 
   const scoreValue = score?.score ?? 0;
-  const progressDegrees = Math.max(0, Math.min(360, (scoreValue / 1000) * 360));
+  const normalizedScore = Math.max(0, Math.min(1000, scoreValue));
+  const scoreProgress = normalizedScore / 1000;
+  const gaugeRadius = 92;
+  const gaugeCircumference = 2 * Math.PI * gaugeRadius;
+  const gaugeOffset = gaugeCircumference * (1 - scoreProgress);
 
   return (
     <main className="min-h-svh bg-[#f7fafa] text-[#102a43]">
@@ -265,11 +281,31 @@ export default function CreditScorePage() {
             <article className="grid gap-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-[220px_1fr] md:p-8">
               <div className="flex items-center justify-center">
                 <div className="relative size-56">
-                  <div className="absolute inset-0 rounded-full border-[18px] border-slate-100" />
-                  <div
-                    className="absolute inset-0 rounded-full border-[18px] border-[#007d82] border-l-transparent"
-                    style={{ transform: `rotate(${progressDegrees}deg)` }}
-                  />
+                  <svg
+                    className="size-full -rotate-90"
+                    viewBox="0 0 224 224"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="112"
+                      cy="112"
+                      r={gaugeRadius}
+                      fill="none"
+                      stroke="#e8eef3"
+                      strokeWidth="18"
+                    />
+                    <circle
+                      cx="112"
+                      cy="112"
+                      r={gaugeRadius}
+                      fill="none"
+                      stroke="#007d82"
+                      strokeLinecap="round"
+                      strokeWidth="18"
+                      strokeDasharray={gaugeCircumference}
+                      strokeDashoffset={gaugeOffset}
+                    />
+                  </svg>
                   <div className="absolute inset-10 flex flex-col items-center justify-center rounded-full bg-white">
                     <span className="font-mono text-5xl font-semibold text-slate-950">
                       {isLoading ? "..." : (score?.score ?? "-")}
@@ -281,11 +317,10 @@ export default function CreditScorePage() {
 
               <div className="flex flex-col justify-center">
                 <div className="mb-7 flex flex-wrap gap-3">
-                  <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700">
+                  <span
+                    className={`rounded-full px-4 py-2 text-sm font-medium ${getDecisionBadgeClassName(score?.decision)}`}
+                  >
                     {decisionLabel(score?.decision)}
-                  </span>
-                  <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-300">
-                    Negado
                   </span>
                 </div>
 

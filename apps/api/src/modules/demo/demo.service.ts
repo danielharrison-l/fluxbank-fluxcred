@@ -13,7 +13,6 @@ import {
   TransactionType,
 } from "@prisma/client";
 import { PrismaService } from "@/infra/database/prisma.service";
-import { CreditRequestsService } from "@/modules/credit-requests/credit-requests.service";
 import { CreditScoreService } from "@/modules/credit-score/credit-score.service";
 import { FinancialMetricsService } from "@/modules/financial-metrics/financial-metrics.service";
 import type { DemoProfile } from "./dto/connect-demo-profile.dto";
@@ -32,6 +31,10 @@ type TransactionDraft = {
 
 type ProfileConfig = {
   institutionName: string;
+  checkingMarketingName: string;
+  reserveMarketingName: string;
+  creditMarketingName: string;
+  incomeDescription: string;
   monthlyIncome: number[];
   incomeDays: number;
   expenseRatio: number;
@@ -39,31 +42,79 @@ type ProfileConfig = {
   reserveBalance: number;
   creditBalance: number;
   creditLimit: number;
-  requestedAmount: number;
+  savingRate: number;
+  cardExpenseRatio: number;
+  expenseProfile: "healthy" | "strained" | "risky";
 };
 
 const PROFILE_CONFIG: Record<DemoProfile, ProfileConfig> = {
-  approved: {
+  excellent: {
     institutionName: "Itaú",
+    checkingMarketingName: "Itau Personnalite",
+    reserveMarketingName: "Itau Reserva",
+    creditMarketingName: "Itau Personnalite Visa",
+    incomeDescription: "Recebimento recorrente",
     monthlyIncome: [9000, 8800, 9200, 8900],
-    incomeDays: 12,
+    incomeDays: 25,
     expenseRatio: 0.55,
     initialBalance: 4200,
     reserveBalance: 8500,
     creditBalance: -900,
     creditLimit: 7000,
-    requestedAmount: 1800,
+    savingRate: 0.12,
+    cardExpenseRatio: 0.18,
+    expenseProfile: "healthy",
+  },
+  approved: {
+    institutionName: "Bradesco",
+    checkingMarketingName: "Bradesco Exclusive",
+    reserveMarketingName: "Bradesco Poupanca",
+    creditMarketingName: "Bradesco Elo Mais",
+    incomeDescription: "Recebimento mensal",
+    monthlyIncome: [3900, 4100, 4000, 3950],
+    incomeDays: 12,
+    expenseRatio: 0.72,
+    initialBalance: 1250,
+    reserveBalance: 1800,
+    creditBalance: -780,
+    creditLimit: 2800,
+    savingRate: 0.05,
+    cardExpenseRatio: 0.22,
+    expenseProfile: "healthy",
+  },
+  borderline: {
+    institutionName: "Nubank",
+    checkingMarketingName: "NuConta",
+    reserveMarketingName: "Caixinha Reserva",
+    creditMarketingName: "Nubank Ultravioleta",
+    incomeDescription: "Recebimento irregular",
+    monthlyIncome: [2200, 1800, 2100, 1700],
+    incomeDays: 6,
+    expenseRatio: 0.95,
+    initialBalance: 320,
+    reserveBalance: 250,
+    creditBalance: -1200,
+    creditLimit: 1800,
+    savingRate: 0.01,
+    cardExpenseRatio: 0.3,
+    expenseProfile: "strained",
   },
   rejected: {
     institutionName: "Santander",
+    checkingMarketingName: "Santander Select",
+    reserveMarketingName: "Santander Reserva",
+    creditMarketingName: "Santander Free",
+    incomeDescription: "Recebimento variavel",
     monthlyIncome: [1800, 1200, 2200, 900],
-    incomeDays: 2,
-    expenseRatio: 1.45,
-    initialBalance: -350,
-    reserveBalance: 0,
-    creditBalance: -2850,
+    incomeDays: 6,
+    expenseRatio: 1.08,
+    initialBalance: 150,
+    reserveBalance: 100,
+    creditBalance: -1900,
     creditLimit: 3000,
-    requestedAmount: 1500,
+    savingRate: 0,
+    cardExpenseRatio: 0.3,
+    expenseProfile: "risky",
   },
 };
 
@@ -73,7 +124,6 @@ export class DemoService {
     private readonly prisma: PrismaService,
     private readonly financialMetricsService: FinancialMetricsService,
     private readonly creditScoreService: CreditScoreService,
-    private readonly creditRequestsService: CreditRequestsService,
   ) {}
 
   async connect(userId: string, profile: DemoProfile) {
@@ -113,8 +163,7 @@ export class DemoService {
         subtype: "CHECKING_ACCOUNT",
         numberMasked: "0001",
         name: "Conta corrente",
-        marketingName:
-          profile === "approved" ? "Itaú Uniclass" : "Santander Select",
+        marketingName: config.checkingMarketingName,
         ownerName: user.name,
         taxNumberMasked: user.document?.slice(-4)
           ? `***.${user.document.slice(-4)}`
@@ -133,8 +182,7 @@ export class DemoService {
         subtype: "SAVINGS_ACCOUNT",
         numberMasked: "0002",
         name: "Reserva",
-        marketingName:
-          profile === "approved" ? "Itaú Poupança" : "Santander Reserva",
+        marketingName: config.reserveMarketingName,
         ownerName: user.name,
         currencyCode: "BRL",
         currentBalance: config.reserveBalance,
@@ -150,8 +198,7 @@ export class DemoService {
         subtype: "CREDIT_CARD",
         numberMasked: "9988",
         name: "Cartão de crédito",
-        marketingName:
-          profile === "approved" ? "Itaú Personnalité Visa" : "Santander Free",
+        marketingName: config.creditMarketingName,
         ownerName: user.name,
         currencyCode: "BRL",
         currentBalance: config.creditBalance,
@@ -207,16 +254,12 @@ export class DemoService {
       periodEnd: periodEnd.toISOString(),
     });
     const score = await this.creditScoreService.calculate(userId);
-    const creditRequest = await this.creditRequestsService.create(userId, {
-      requestedAmount: config.requestedAmount,
-    });
 
     return {
       profile,
       item: pluggyItem,
       metric,
       score,
-      creditRequest,
     };
   }
 
@@ -286,10 +329,7 @@ export class DemoService {
           type: TransactionType.CREDIT,
           amount,
           balance: checkingBalance,
-          description:
-            profile === "approved"
-              ? "Recebimento recorrente"
-              : "Recebimento variável",
+          description: config.incomeDescription,
           category: "Renda",
           merchantName: "Cliente demo",
           transactionDate: date,
@@ -315,8 +355,8 @@ export class DemoService {
         });
       });
 
-      if (profile === "approved") {
-        const saving = this.money(income * 0.12);
+      if (config.savingRate > 0) {
+        const saving = this.money(income * config.savingRate);
         checkingBalance = this.money(checkingBalance - saving);
         reserveBalance = this.money(reserveBalance + saving);
         transactions.push({
@@ -331,8 +371,7 @@ export class DemoService {
         });
       }
 
-      const cardExpenseRatio = profile === "approved" ? 0.18 : 0.38;
-      const cardExpense = this.money(income * cardExpenseRatio);
+      const cardExpense = this.money(income * config.cardExpenseRatio);
       creditBalance = this.money(creditBalance - cardExpense);
       transactions.push({
         accountId: creditAccountId,
@@ -353,8 +392,9 @@ export class DemoService {
   }
 
   private splitExpenses(total: number, profile: DemoProfile) {
+    const expenseProfile = PROFILE_CONFIG[profile].expenseProfile;
     const base =
-      profile === "rejected"
+      expenseProfile === "risky"
         ? [
             ["Aluguel atrasado", "Moradia", 0.34],
             ["Mercado", "Alimentacao", 0.2],
@@ -363,15 +403,24 @@ export class DemoService {
             ["Serviços essenciais", "Contas", 0.09],
             ["Compras parceladas", "Compras", 0.07],
           ]
-        : [
-            ["Aluguel", "Moradia", 0.32],
-            ["Mercado", "Alimentacao", 0.22],
-            ["Transporte", "Transporte", 0.12],
-            ["Serviços essenciais", "Contas", 0.12],
-            ["Educação", "Educação", 0.1],
-            ["Lazer", "Lazer", 0.07],
-            ["Assinaturas", "Serviços", 0.05],
-          ];
+        : expenseProfile === "strained"
+          ? [
+              ["Aluguel", "Moradia", 0.34],
+              ["Mercado", "Alimentacao", 0.24],
+              ["Parcela de emprestimo", "Dividas", 0.14],
+              ["Transporte", "Transporte", 0.1],
+              ["Servicos essenciais", "Contas", 0.11],
+              ["Compras", "Compras", 0.07],
+            ]
+          : [
+              ["Aluguel", "Moradia", 0.32],
+              ["Mercado", "Alimentacao", 0.22],
+              ["Transporte", "Transporte", 0.12],
+              ["Serviços essenciais", "Contas", 0.12],
+              ["Educação", "Educação", 0.1],
+              ["Lazer", "Lazer", 0.07],
+              ["Assinaturas", "Serviços", 0.05],
+            ];
 
     return base.map(([description, category, weight]) => ({
       description: String(description),

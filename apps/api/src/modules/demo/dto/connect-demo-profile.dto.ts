@@ -1,6 +1,11 @@
 import { IsIn } from "class-validator";
 
-export const DEMO_PROFILES = ["approved", "rejected"] as const;
+export const DEMO_PROFILES = [
+  "excellent",
+  "approved",
+  "borderline",
+  "rejected",
+] as const;
 
 export type DemoProfile = (typeof DEMO_PROFILES)[number];
 

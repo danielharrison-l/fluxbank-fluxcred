@@ -52,15 +52,37 @@ const bottomNavItems = [
 
 const demoProfiles = [
   {
-    id: "approved",
+    id: "excellent",
     bank: "Itaú",
-    title: "Perfil aprovado",
+    title: "Perfil excelente",
     description:
       "Renda frequente, gastos controlados e reserva positiva para gerar uma decisão aprovada.",
-    badge: "Aprovado",
+    badge: "Excelente",
     logoText: "itaú",
     logoClassName: "bg-[#003399] text-[#ff7a00]",
     className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  },
+  {
+    id: "approved",
+    bank: "Bradesco",
+    title: "Perfil aprovado",
+    description:
+      "Renda estavel, saldo positivo e limite recomendado mais conservador.",
+    badge: "Aprovado",
+    logoText: "BRA",
+    logoClassName: "bg-[#cc092f] text-white",
+    className: "border-teal-200 bg-teal-50 text-teal-700",
+  },
+  {
+    id: "borderline",
+    bank: "Nubank",
+    title: "Perfil limitrofe",
+    description:
+      "Renda razoavel, mas fluxo apertado e pouco espaco para novo credito.",
+    badge: "Limitrofe",
+    logoText: "NU",
+    logoClassName: "bg-[#820ad1] text-white",
+    className: "border-amber-200 bg-amber-50 text-amber-700",
   },
   {
     id: "rejected",
@@ -93,18 +115,13 @@ type DemoConnectResponse = {
     decision: "APPROVED" | "REJECTED";
     recommendedLimit: string | number;
   };
-  creditRequest: {
-    status: "APPROVED" | "REJECTED" | "PENDING";
-    requestedAmount: string | number;
-    approvedAmount?: string | number | null;
-  };
 };
 
 export default function ConnectAccountsPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<ConnectionStatus>("idle");
   const [selectedProfile, setSelectedProfile] =
-    useState<DemoProfile>("approved");
+    useState<DemoProfile>("excellent");
   const [connectedItem, setConnectedItem] = useState<DemoItem | null>(null);
   const [demoResult, setDemoResult] = useState<DemoConnectResponse | null>(
     null,
@@ -293,7 +310,7 @@ export default function ConnectAccountsPage() {
                 </h1>
                 <p className="mt-2 max-w-xl text-base leading-7 text-[#506383]">
                   Escolha um banco demonstrativo para gerar contas, transações,
-                  métricas, score e pedido de crédito mockados.
+                  métricas e score mockados.
                 </p>
               </div>
 
@@ -316,7 +333,7 @@ export default function ConnectAccountsPage() {
                     </p>
                   </div>
 
-                  <div className="grid gap-4 p-6 md:grid-cols-3">
+                  <div className="grid gap-4 p-6 md:grid-cols-2 xl:grid-cols-4">
                     {demoProfiles.map((profile) => {
                       const isSelected = selectedProfile === profile.id;
                       const isLoading =
@@ -406,8 +423,8 @@ export default function ConnectAccountsPage() {
                         </h3>
                       </div>
                       <p className="text-xs leading-6 text-[#506383]">
-                        Estamos criando contas, transações, métricas, score e
-                        solicitação de crédito para o perfil escolhido.
+                        Estamos limpando dados anteriores e criando contas,
+                        transações, métricas e score para o perfil escolhido.
                       </p>
                       <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
                         <div className="h-full w-[70%] rounded-full bg-[#14b8a6]" />
@@ -456,7 +473,8 @@ export default function ConnectAccountsPage() {
                     </h3>
                     <p className="mt-3 text-sm leading-6 text-[#506383]">
                       O banco foi vinculado e os dados já podem ser avaliados no
-                      dashboard, análise, score e solicitação de crédito.
+                      dashboard, análise e score. A solicitação de crédito deve
+                      ser feita manualmente.
                     </p>
 
                     <div className="mt-6 space-y-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
@@ -492,9 +510,11 @@ export default function ConnectAccountsPage() {
                             </p>
                           </div>
                           <div className="rounded-md bg-white p-3">
-                            <p className="text-slate-500">Pedido</p>
+                            <p className="text-slate-500">Decisão</p>
                             <p className="mt-1 font-bold text-slate-950">
-                              {demoResult.creditRequest.status}
+                              {demoResult.score.decision === "APPROVED"
+                                ? "Aprovado"
+                                : "Recusado"}
                             </p>
                           </div>
                         </div>
@@ -503,10 +523,10 @@ export default function ConnectAccountsPage() {
 
                     <Button
                       type="button"
-                      onClick={() => navigate("/dashboard")}
+                      onClick={() => navigate("/credit-request")}
                       className="mt-5 h-11 w-full rounded-xl bg-[#00766d] font-bold text-white hover:bg-[#005f58]"
                     >
-                      Ver dashboard
+                      Solicitar crédito
                     </Button>
                   </div>
                 )}
