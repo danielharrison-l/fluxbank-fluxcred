@@ -40,36 +40,25 @@ const banks = [
 ];
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Instituições", icon: Building2, active: true },
-  { label: "Transações", icon: ReceiptText },
-  { label: "Análise", icon: BarChart3 },
-  { label: "Configurações", icon: Settings },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  {
+    label: "Instituições",
+    href: "/connect-accounts",
+    icon: Building2,
+    active: true,
+  },
+  { label: "Transações", href: "/transactions", icon: ReceiptText },
+  { label: "Análise", href: "/analysis", icon: BarChart3 },
+  { label: "Configurações", href: "/profile", icon: Settings },
 ];
 
 const bottomNavItems = [
-  { label: "Home", icon: Home },
-  { label: "Atividade", icon: List },
-  { label: "Crédito", icon: Landmark, active: true },
-  { label: "Análise", icon: BarChart3 },
-  { label: "Perfil", icon: User },
+  { label: "Home", href: "/dashboard", icon: Home },
+  { label: "Atividade", href: "/transactions", icon: List },
+  { label: "Crédito", href: "/credit-request", icon: Landmark, active: true },
+  { label: "Análise", href: "/analysis", icon: BarChart3 },
+  { label: "Perfil", href: "/profile", icon: User },
 ];
-
-const navItemHrefByLabel: Record<string, string> = {
-  Dashboard: "/dashboard",
-  "InstituiÃ§Ãµes": "/connect-accounts",
-  "TransaÃ§Ãµes": "/transactions",
-  "AnÃ¡lise": "/credit-score",
-  "ConfiguraÃ§Ãµes": "/dashboard",
-};
-
-const bottomNavHrefByLabel: Record<string, string> = {
-  Home: "/dashboard",
-  Atividade: "/transactions",
-  "CrÃ©dito": "/credit-request",
-  "AnÃ¡lise": "/credit-score",
-  Perfil: "/dashboard",
-};
 
 type ConnectionStatus = "idle" | "loading" | "success" | "error";
 
@@ -210,9 +199,7 @@ export default function ConnectAccountsPage() {
         },
         onError: (error) => {
           setStatus("error");
-          setErrorMessage(
-            error.message ?? "Falha na autenticação com o banco.",
-          );
+          setErrorMessage(error.message ?? "Falha na autenticação com o banco.");
         },
       });
 
@@ -229,46 +216,8 @@ export default function ConnectAccountsPage() {
 
   return (
     <main className="min-h-svh bg-[#f7fafa] text-[#102a43]">
-      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-slate-200 bg-white/90 px-5 shadow-sm backdrop-blur md:px-8">
-        <div className="flex items-center gap-6">
-          <span className="font-mono text-xl font-bold text-[#00766d]">
-            FluxCred
-          </span>
-          <div className="relative hidden lg:block">
-            <Search
-              className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
-              aria-hidden="true"
-            />
-            <Input
-              placeholder="Buscar..."
-              className="h-9 w-72 rounded-full border-0 bg-slate-100 pl-9 shadow-none focus-visible:ring-[#00766d]"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
-            aria-label="Ajuda"
-          >
-            <HelpCircle className="size-5" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
-            aria-label="Notificações"
-          >
-            <Bell className="size-5" aria-hidden="true" />
-          </button>
-          <div className="ml-1 flex size-9 items-center justify-center rounded-full bg-[#006d77] text-white">
-            <User className="size-5" aria-hidden="true" />
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto flex max-w-[1440px]">
-        <aside className="sticky top-14 hidden h-[calc(100svh-56px)] w-72 shrink-0 flex-col border-r border-slate-100 bg-white p-6 md:flex">
+      <aside className="fixed left-0 top-0 z-50 hidden h-svh w-72 border-r border-slate-200 bg-white md:flex md:flex-col">
+        <div className="flex h-full flex-col p-6">
           <div className="mb-8">
             <h2 className="font-mono text-2xl font-black text-[#00766d]">
               FluxCred
@@ -284,17 +233,7 @@ export default function ConnectAccountsPage() {
 
               return (
                 <a
-                  href={
-                    item.icon === LayoutDashboard
-                      ? "/dashboard"
-                      : item.icon === Building2
-                        ? "/connect-accounts"
-                        : item.icon === ReceiptText
-                          ? "/transactions"
-                          : item.icon === BarChart3
-                            ? "/analysis"
-                            : "/dashboard"
-                  }
+                  href={item.href}
                   key={item.label}
                   className={
                     item.active
@@ -312,17 +251,62 @@ export default function ConnectAccountsPage() {
           <div className="mt-auto border-t border-slate-100 pt-5">
             <Button className="h-12 w-full rounded-xl bg-[#00766d] font-bold text-white hover:bg-[#005f58]">
               <Plus className="size-5" aria-hidden="true" />
-              Novo Emprestimo
+              Novo Empréstimo
             </Button>
           </div>
-        </aside>
+        </div>
+      </aside>
 
-        <section className="flex-1 px-5 py-8 pb-28 md:px-10 md:pb-10">
-          <div className="mx-auto max-w-[1080px] space-y-6">
+      <section className="min-h-svh pb-28 md:ml-72 md:pb-10">
+        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/85 shadow-sm backdrop-blur">
+          <div className="flex h-16 items-center justify-between px-5 md:px-8">
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-xl font-extrabold text-[#00766d] md:hidden">
+                FluxCred
+              </span>
+              <h2 className="hidden font-mono text-lg font-semibold text-slate-950 md:block">
+                Instituições conectadas
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-3 sm:gap-5">
+              <div className="relative hidden lg:block">
+                <Search
+                  className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                  aria-hidden="true"
+                />
+                <Input
+                  placeholder="Buscar..."
+                  className="h-10 w-56 rounded-full border-0 bg-slate-100 pl-10 shadow-none focus-visible:ring-[#00766d] lg:w-72"
+                />
+              </div>
+              <button
+                type="button"
+                className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
+                aria-label="Ajuda"
+              >
+                <HelpCircle className="size-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
+                aria-label="Notificações"
+              >
+                <Bell className="size-5" aria-hidden="true" />
+              </button>
+              <div className="ml-1 flex size-9 items-center justify-center rounded-full bg-[#006d77] text-white">
+                <User className="size-5" aria-hidden="true" />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="p-5 md:p-8">
+          <div className="mx-auto max-w-[1280px] space-y-6">
             <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
               <div>
                 <h1 className="font-mono text-2xl font-semibold text-slate-950">
-                  Conectar Conta
+                  Conectar conta
                 </h1>
                 <p className="mt-2 max-w-xl text-base leading-7 text-[#506383]">
                   Utilizamos o Pluggy para uma conexão segura via Open Finance.
@@ -340,7 +324,7 @@ export default function ConnectAccountsPage() {
                 <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                   <div className="border-b border-slate-100 p-6">
                     <h2 className="font-mono text-xl font-semibold text-slate-900">
-                      Selecione sua Instituição
+                      Selecione sua instituição
                     </h2>
                     <p className="mt-1 text-sm leading-6 text-[#506383]">
                       Busque ou escolha um dos bancos parceiros abaixo.
@@ -500,7 +484,7 @@ export default function ConnectAccountsPage() {
                       Aumente suas chances de aprovação em até 45%
                     </p>
                     <p className="mb-6 text-xs leading-6 text-white/85">
-                      Ao compartilhar seu historico, conseguimos oferecer taxas
+                      Ao compartilhar seu histórico, conseguimos oferecer taxas
                       personalizadas e limites maiores.
                     </p>
 
@@ -529,8 +513,8 @@ export default function ConnectAccountsPage() {
               </aside>
             </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
       <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-2xl border-t border-slate-200 bg-white/95 px-3 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] backdrop-blur md:hidden">
         {bottomNavItems.map((item) => {
@@ -538,17 +522,7 @@ export default function ConnectAccountsPage() {
 
           return (
             <a
-              href={
-                item.icon === Home
-                  ? "/dashboard"
-                  : item.icon === List
-                    ? "/transactions"
-                    : item.icon === Landmark
-                      ? "/credit-request"
-                      : item.icon === BarChart3
-                        ? "/analysis"
-                        : "/dashboard"
-              }
+              href={item.href}
               key={item.label}
               className={
                 item.active
@@ -567,4 +541,3 @@ export default function ConnectAccountsPage() {
     </main>
   );
 }
-

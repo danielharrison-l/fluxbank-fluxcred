@@ -47,7 +47,7 @@ const bottomNavItems = [
   { label: "Atividade", href: "/transactions", icon: List },
   { label: "Solicitar", href: "/credit-request", icon: CirclePlus, primary: true },
   { label: "Análise", href: "/analysis", icon: BarChart3 },
-  { label: "Perfil", href: "/dashboard", icon: User },
+  { label: "Perfil", href: "/profile", icon: User },
 ];
 
 type DashboardAccount = {

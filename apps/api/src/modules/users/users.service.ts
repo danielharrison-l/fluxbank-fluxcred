@@ -6,7 +6,16 @@ import { CreateUserDto } from "./dto/create-user.dto";
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createUser(data: CreateUserDto & { passwordHash: string }) {
+  async createUser(
+    data: CreateUserDto & {
+      passwordHash: string;
+      emailVerifiedAt?: Date | null;
+      emailVerificationTokenHash?: string | null;
+      emailVerificationTokenExpiresAt?: Date | null;
+      passwordResetTokenHash?: string | null;
+      passwordResetTokenExpiresAt?: Date | null;
+    },
+  ) {
     const existingUser = await this.findByEmail(data.email);
 
     if (existingUser) {
@@ -20,6 +29,11 @@ export class UsersService {
         passwordHash: data.passwordHash,
         phone: data.phone,
         document: data.document,
+        emailVerifiedAt: data.emailVerifiedAt,
+        emailVerificationTokenHash: data.emailVerificationTokenHash,
+        emailVerificationTokenExpiresAt: data.emailVerificationTokenExpiresAt,
+        passwordResetTokenHash: data.passwordResetTokenHash,
+        passwordResetTokenExpiresAt: data.passwordResetTokenExpiresAt,
       },
     });
   }
@@ -36,6 +50,18 @@ export class UsersService {
     });
   }
 
+  async findByEmailVerificationTokenHash(emailVerificationTokenHash: string) {
+    return this.prisma.user.findUnique({
+      where: { emailVerificationTokenHash },
+    });
+  }
+
+  async findByPasswordResetTokenHash(passwordResetTokenHash: string) {
+    return this.prisma.user.findUnique({
+      where: { passwordResetTokenHash },
+    });
+  }
+
   async findSafeById(id: string) {
     const user = await this.findById(id);
 
@@ -45,6 +71,10 @@ export class UsersService {
 
     const {
       passwordHash: _passwordHash,
+      emailVerificationTokenHash: _emailVerificationTokenHash,
+      emailVerificationTokenExpiresAt: _emailVerificationTokenExpiresAt,
+      passwordResetTokenHash: _passwordResetTokenHash,
+      passwordResetTokenExpiresAt: _passwordResetTokenExpiresAt,
       refreshTokenHash: _refreshTokenHash,
       refreshTokenExpiresAt: _refreshTokenExpiresAt,
       ...safeUser
@@ -62,6 +92,48 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id: userId },
       data,
+    });
+  }
+
+  async updateEmailVerification(
+    userId: string,
+    data: {
+      emailVerifiedAt?: Date | null;
+      emailVerificationTokenHash?: string | null;
+      emailVerificationTokenExpiresAt?: Date | null;
+    },
+  ) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+  }
+
+  async updatePasswordReset(
+    userId: string,
+    data: {
+      passwordResetTokenHash?: string | null;
+      passwordResetTokenExpiresAt?: Date | null;
+    },
+  ) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+  }
+
+  async updatePassword(userId: string, passwordHash: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash,
+      },
+    });
+  }
+
+  async deleteUser(id: string) {
+    await this.prisma.user.delete({
+      where: { id },
     });
   }
 }

@@ -19,15 +19,20 @@ export function LoginScreen() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<
+    string | null
+  >(null);
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
     setErrorMessage(null);
+    setPendingVerificationEmail(null);
 
     const formData = new FormData(event.currentTarget);
     const apiBaseUrl = getApiBaseUrl();
+    const email = String(formData.get("email") ?? "").trim().toLowerCase();
 
     try {
       const response = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -35,13 +40,32 @@ export function LoginScreen() {
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: String(formData.get("email") ?? ""),
+          email,
           password: String(formData.get("password") ?? ""),
         }),
       });
 
       if (!response.ok) {
-        throw new Error("E-mail ou senha inválidos.");
+        const data = await parseJsonResponse<{ message?: string | string[] }>(
+          response,
+        ).catch(() => null);
+        const message =
+          typeof data?.message === "string"
+            ? data.message
+            : Array.isArray(data?.message)
+              ? data.message.join(", ")
+              : "Não foi possível entrar.";
+
+        if (message === "Email not verified") {
+          setPendingVerificationEmail(email);
+          throw new Error("Confirme seu e-mail antes de entrar.");
+        }
+
+        throw new Error(
+          message === "Invalid credentials"
+            ? "E-mail ou senha inválidos."
+            : message,
+        );
       }
 
       const data = await parseJsonResponse<{ accessToken?: string }>(response);
@@ -119,7 +143,7 @@ export function LoginScreen() {
                   Senha
                 </Label>
                 <Link
-                  to="#"
+                  to="/forgot-password"
                   className="text-sm font-bold text-[#0c9a8d] hover:underline"
                 >
                   Esqueci a senha
@@ -173,6 +197,18 @@ export function LoginScreen() {
             {errorMessage && (
               <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
                 {errorMessage}
+              </p>
+            )}
+
+            {pendingVerificationEmail && (
+              <p className="text-sm text-[#506383]">
+                Precisa de um novo link?{" "}
+                <Link
+                  to={`/verify-email?email=${encodeURIComponent(pendingVerificationEmail)}`}
+                  className="font-semibold text-[#0c9a8d] hover:underline"
+                >
+                  Reenviar confirmação
+                </Link>
               </p>
             )}
           </form>

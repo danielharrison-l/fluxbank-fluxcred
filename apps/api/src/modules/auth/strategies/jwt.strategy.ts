@@ -33,6 +33,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const {
       passwordHash: _passwordHash,
+      emailVerificationTokenHash: _emailVerificationTokenHash,
+      emailVerificationTokenExpiresAt: _emailVerificationTokenExpiresAt,
+      passwordResetTokenHash: _passwordResetTokenHash,
+      passwordResetTokenExpiresAt: _passwordResetTokenExpiresAt,
       refreshTokenHash: _refreshTokenHash,
       refreshTokenExpiresAt: _refreshTokenExpiresAt,
       ...safeUser

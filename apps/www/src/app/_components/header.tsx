@@ -42,6 +42,18 @@ export function Header() {
           </a>
         </nav>
         <div className="flex items-center gap-2">
+          <a
+            href="/login?view=form"
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
+          >
+            Entrar
+          </a>
+          <a
+            href="/register?view=form"
+            className="inline-flex rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-[#004f56]"
+          >
+            Criar conta
+          </a>
           <ThemeSwitcher />
         </div>
       </div>

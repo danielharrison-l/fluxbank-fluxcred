@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { storeAccessToken } from "@/lib/auth";
 import { getApiBaseUrl, parseJsonResponse } from "@/lib/api";
 
 type AuthFormMode = "login" | "register";
@@ -73,22 +72,18 @@ export function LoginForm({
             ? data.message
             : Array.isArray(data?.message)
               ? data.message.join(", ")
-            : "Não foi possível criar sua conta.";
+              : "Não foi possível criar sua conta.";
+
         throw new Error(
           message === "Email already registered"
-            ? "Este e-mail ja esta cadastrado."
+            ? "Este e-mail já está cadastrado."
             : message,
         );
       }
 
-      const data = await parseJsonResponse<{ accessToken?: string }>(response);
-
-      if (!data?.accessToken) {
-        throw new Error("A API não retornou o token de acesso.");
-      }
-
-      storeAccessToken(data.accessToken);
-      navigate("/dashboard");
+      navigate(
+        `/verify-email?sent=1&email=${encodeURIComponent(payload.email)}`,
+      );
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -238,7 +233,10 @@ export function LoginForm({
                 />
                 Manter conectado
               </label>
-              <Link to="#" className="font-medium text-primary hover:underline">
+              <Link
+                to="/forgot-password"
+                className="font-medium text-primary hover:underline"
+              >
                 Esqueci minha senha
               </Link>
             </div>

@@ -64,7 +64,7 @@ const mobileNavItems = [
   { label: "Atividade", href: "/transactions", icon: List },
   { label: "Análise", href: "/analysis", icon: BarChart3, active: true },
   { label: "Crédito", href: "/credit-request", icon: CreditCard },
-  { label: "Perfil", href: "/dashboard", icon: User },
+  { label: "Perfil", href: "/profile", icon: User },
 ];
 
 function formatPercent(value: number) {

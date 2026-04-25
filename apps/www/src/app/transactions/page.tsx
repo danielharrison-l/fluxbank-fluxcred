@@ -81,7 +81,7 @@ const mobileNavItems = [
   { label: "Atividade", href: "/transactions", icon: List, active: true },
   { label: "Solicitar", href: "/credit-request", icon: CirclePlus, primary: true },
   { label: "Score", href: "/credit-score", icon: Gauge },
-  { label: "Perfil", href: "/dashboard", icon: User },
+  { label: "Perfil", href: "/profile", icon: User },
 ];
 
 function formatAccountType(type: AccountType) {

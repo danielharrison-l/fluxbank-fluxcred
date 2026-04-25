@@ -5,11 +5,15 @@ import ConnectAccountsPage from "./app/connect-accounts/page";
 import CreditRequestPage from "./app/credit-request/page";
 import CreditScorePage from "./app/credit-score/page";
 import DashboardPage from "./app/dashboard/page";
+import ForgotPasswordPage from "./app/forgot-password/page";
 import LogoutPage from "./app/logout/page";
 import Home from "./app/page";
 import LoginPage from "./app/login/page";
+import ProfilePage from "./app/profile/page";
 import RegisterPage from "./app/register/page";
+import ResetPasswordPage from "./app/reset-password/page";
 import TransactionsPage from "./app/transactions/page";
+import VerifyEmailPage from "./app/verify-email/page";
 import { getStoredAccessToken } from "./lib/auth";
 
 function hasStoredSession() {
@@ -48,6 +52,9 @@ export function App() {
           </PublicAuthRoute>
         }
       />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/logout" element={<LogoutPage />} />
       <Route
         path="/dashboard"
@@ -102,6 +109,14 @@ export function App() {
         element={
           <ProtectedRoute>
             <CreditRequestPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />

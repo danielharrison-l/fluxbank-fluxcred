@@ -1,7 +1,13 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { createHash, randomBytes } from "node:crypto";
+import { MailService } from "@/modules/mail/mail.service";
 import { UsersService } from "@/modules/users/users.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
@@ -13,6 +19,11 @@ type AuthenticatedUser = {
   passwordHash: string;
   phone: string | null;
   document: string | null;
+  emailVerifiedAt: Date | null;
+  emailVerificationTokenHash: string | null;
+  emailVerificationTokenExpiresAt: Date | null;
+  passwordResetTokenHash: string | null;
+  passwordResetTokenExpiresAt: Date | null;
   refreshTokenHash: string | null;
   refreshTokenExpiresAt: Date | null;
   createdAt: Date;
@@ -25,6 +36,10 @@ export class AuthService {
     process.env.ACCESS_TOKEN_TTL?.trim() || "15m";
   private readonly refreshTokenTtl =
     process.env.REFRESH_TOKEN_TTL?.trim() || "7d";
+  private readonly emailVerificationTtl =
+    process.env.EMAIL_VERIFICATION_TTL?.trim() || "24h";
+  private readonly passwordResetTtl =
+    process.env.PASSWORD_RESET_TTL?.trim() || "1h";
   private readonly refreshTokenSecret =
     process.env.JWT_REFRESH_SECRET?.trim() ||
     process.env.JWT_SECRET ||
@@ -35,13 +50,45 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async register(data: RegisterDto) {
     const passwordHash = await bcrypt.hash(data.password, 12);
-    const user = await this.usersService.createUser({ ...data, passwordHash });
+    const verificationToken = this.generateOpaqueToken();
+    const user = await this.usersService.createUser({
+      ...data,
+      passwordHash,
+      emailVerifiedAt: null,
+      emailVerificationTokenHash: this.hashToken(verificationToken),
+      emailVerificationTokenExpiresAt: new Date(
+        Date.now() + this.parseDurationToMs(this.emailVerificationTtl),
+      ),
+    });
 
-    return this.buildAuthResponse(user);
+    try {
+      await this.mailService.sendEmailVerification({
+        email: user.email,
+        name: user.name,
+        token: verificationToken,
+      });
+    } catch (error) {
+      await this.usersService.deleteUser(user.id);
+
+      if (error instanceof ServiceUnavailableException) {
+        throw error;
+      }
+
+      throw new ServiceUnavailableException(
+        "Não foi possível enviar o e-mail de confirmação.",
+      );
+    }
+
+    return {
+      success: true,
+      email: user.email,
+      message: "Conta criada. Confirme seu e-mail para liberar o acesso.",
+    };
   }
 
   async login(data: LoginDto) {
@@ -60,7 +107,136 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials");
     }
 
+    if (!user.emailVerifiedAt) {
+      throw new UnauthorizedException("Email not verified");
+    }
+
     return this.buildAuthResponse(user);
+  }
+
+  async verifyEmail(token: string) {
+    if (!token) {
+      throw new BadRequestException("Verification token missing");
+    }
+
+    const user = await this.usersService.findByEmailVerificationTokenHash(
+      this.hashToken(token),
+    );
+
+    if (!user?.emailVerificationTokenExpiresAt) {
+      throw new BadRequestException("Invalid verification token");
+    }
+
+    if (user.emailVerificationTokenExpiresAt.getTime() <= Date.now()) {
+      throw new BadRequestException("Verification token expired");
+    }
+
+    await this.usersService.updateEmailVerification(user.id, {
+      emailVerifiedAt: new Date(),
+      emailVerificationTokenHash: null,
+      emailVerificationTokenExpiresAt: null,
+    });
+
+    return {
+      success: true,
+      message: "E-mail confirmado com sucesso. Faça login para continuar.",
+    };
+  }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user || user.emailVerifiedAt) {
+      return {
+        success: true,
+        message: "Se a conta existir, enviaremos um novo link de confirmação.",
+      };
+    }
+
+    const verificationToken = this.generateOpaqueToken();
+
+    await this.usersService.updateEmailVerification(user.id, {
+      emailVerificationTokenHash: this.hashToken(verificationToken),
+      emailVerificationTokenExpiresAt: new Date(
+        Date.now() + this.parseDurationToMs(this.emailVerificationTtl),
+      ),
+    });
+
+    await this.mailService.sendEmailVerification({
+      email: user.email,
+      name: user.name,
+      token: verificationToken,
+    });
+
+    return {
+      success: true,
+      message: "Se a conta existir, enviaremos um novo link de confirmação.",
+    };
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user || !user.emailVerifiedAt) {
+      return {
+        success: true,
+        message:
+          "Se a conta existir, enviaremos instruções para redefinir a senha.",
+      };
+    }
+
+    const resetToken = this.generateOpaqueToken();
+
+    await this.usersService.updatePasswordReset(user.id, {
+      passwordResetTokenHash: this.hashToken(resetToken),
+      passwordResetTokenExpiresAt: new Date(
+        Date.now() + this.parseDurationToMs(this.passwordResetTtl),
+      ),
+    });
+
+    await this.mailService.sendPasswordReset({
+      email: user.email,
+      name: user.name,
+      token: resetToken,
+    });
+
+    return {
+      success: true,
+      message:
+        "Se a conta existir, enviaremos instruções para redefinir a senha.",
+    };
+  }
+
+  async resetPassword(token: string, password: string) {
+    if (!token) {
+      throw new BadRequestException("Reset token missing");
+    }
+
+    const user = await this.usersService.findByPasswordResetTokenHash(
+      this.hashToken(token),
+    );
+
+    if (!user?.passwordResetTokenExpiresAt) {
+      throw new BadRequestException("Invalid reset token");
+    }
+
+    if (user.passwordResetTokenExpiresAt.getTime() <= Date.now()) {
+      throw new BadRequestException("Reset token expired");
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    await this.usersService.updatePassword(user.id, passwordHash);
+    await this.usersService.updatePasswordReset(user.id, {
+      passwordResetTokenHash: null,
+      passwordResetTokenExpiresAt: null,
+    });
+    await this.clearRefreshSession(user.id);
+
+    return {
+      success: true,
+      message: "Senha redefinida com sucesso. Faça login com a nova senha.",
+    };
   }
 
   async refreshAccessToken(refreshToken: string | undefined) {
@@ -140,8 +316,16 @@ export class AuthService {
   }
 
   private async buildAuthResponse(user: AuthenticatedUser) {
-    const { passwordHash: _passwordHash, refreshTokenHash: _refreshTokenHash, refreshTokenExpiresAt: _refreshTokenExpiresAt, ...safeUser } =
-      user;
+    const {
+      passwordHash: _passwordHash,
+      emailVerificationTokenHash: _emailVerificationTokenHash,
+      emailVerificationTokenExpiresAt: _emailVerificationTokenExpiresAt,
+      passwordResetTokenHash: _passwordResetTokenHash,
+      passwordResetTokenExpiresAt: _passwordResetTokenExpiresAt,
+      refreshTokenHash: _refreshTokenHash,
+      refreshTokenExpiresAt: _refreshTokenExpiresAt,
+      ...safeUser
+    } = user;
 
     const accessToken = await this.jwtService.signAsync(
       {
@@ -149,7 +333,9 @@ export class AuthService {
         email: user.email,
       },
       {
-        expiresIn: Math.floor(this.parseDurationToMs(this.accessTokenTtl) / 1000),
+        expiresIn: Math.floor(
+          this.parseDurationToMs(this.accessTokenTtl) / 1000,
+        ),
       },
     );
 
@@ -161,7 +347,9 @@ export class AuthService {
       },
       {
         secret: this.refreshTokenSecret,
-        expiresIn: Math.floor(this.parseDurationToMs(this.refreshTokenTtl) / 1000),
+        expiresIn: Math.floor(
+          this.parseDurationToMs(this.refreshTokenTtl) / 1000,
+        ),
       },
     );
 
@@ -188,6 +376,10 @@ export class AuthService {
 
   private hashToken(token: string) {
     return createHash("sha256").update(token).digest("hex");
+  }
+
+  private generateOpaqueToken() {
+    return randomBytes(32).toString("hex");
   }
 
   private parseDurationToMs(value: string) {

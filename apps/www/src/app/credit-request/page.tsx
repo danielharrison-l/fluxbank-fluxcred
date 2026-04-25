@@ -51,7 +51,7 @@ const mobileNavItems = [
     icon: WalletCards,
     active: true,
   },
-  { label: "Perfil", href: "/dashboard", icon: User },
+  { label: "Perfil", href: "/profile", icon: User },
 ];
 
 type CreditScore = {
@@ -214,8 +214,8 @@ export default function CreditRequestPage() {
 
   return (
     <main className="min-h-svh bg-[#f7fafa] text-[#181c1d]">
-      <aside className="fixed left-0 top-0 z-40 hidden h-svh w-72 border-r border-slate-200 bg-white md:flex md:flex-col">
-        <div className="flex h-full flex-col gap-2 p-6 pt-20">
+      <aside className="fixed left-0 top-0 z-50 hidden h-svh w-72 border-r border-slate-200 bg-white md:flex md:flex-col">
+        <div className="flex h-full flex-col gap-2 p-6">
           <div className="mb-8 px-2">
             <h2 className="font-mono text-2xl font-bold text-[#00766d]">
               FluxCred

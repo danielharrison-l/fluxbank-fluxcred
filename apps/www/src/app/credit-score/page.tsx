@@ -447,7 +447,7 @@ export default function CreditScorePage() {
                       ? "/analysis"
                       : item.icon === BadgeCheck
                         ? "/credit-score"
-                        : "/dashboard"
+                : "/profile"
               }
               key={item.label}
               className={

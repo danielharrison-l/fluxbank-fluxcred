@@ -15,8 +15,12 @@ import {
 } from "@nestjs/swagger";
 import type { Request, Response } from "express";
 import { AuthService } from "./auth.service";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
+import { ResendVerificationDto } from "./dto/resend-verification.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
+import { VerifyEmailDto } from "./dto/verify-email.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 
 @Controller("auth")
@@ -29,14 +33,8 @@ export class AuthController {
   @ApiResponse({ status: 201, description: "User registered" })
   async register(
     @Body() data: RegisterDto,
-    @Res({ passthrough: true }) response: Response,
   ) {
-    const authResult = await this.authService.register(data);
-
-    this.writeRefreshCookie(response, authResult.refreshToken);
-
-    const { refreshToken: _refreshToken, ...authResponse } = authResult;
-    return authResponse;
+    return this.authService.register(data);
   }
 
   @Post("login")
@@ -88,6 +86,34 @@ export class AuthController {
     );
 
     return { success: true };
+  }
+
+  @Post("verify-email")
+  @ApiOperation({ summary: "Verify account email" })
+  @ApiResponse({ status: 201, description: "Email verified" })
+  verifyEmail(@Body() data: VerifyEmailDto) {
+    return this.authService.verifyEmail(data.token);
+  }
+
+  @Post("resend-verification")
+  @ApiOperation({ summary: "Resend account verification email" })
+  @ApiResponse({ status: 201, description: "Verification email sent" })
+  resendVerification(@Body() data: ResendVerificationDto) {
+    return this.authService.resendVerificationEmail(data.email);
+  }
+
+  @Post("forgot-password")
+  @ApiOperation({ summary: "Request password reset email" })
+  @ApiResponse({ status: 201, description: "Reset email requested" })
+  forgotPassword(@Body() data: ForgotPasswordDto) {
+    return this.authService.requestPasswordReset(data.email);
+  }
+
+  @Post("reset-password")
+  @ApiOperation({ summary: "Reset account password" })
+  @ApiResponse({ status: 201, description: "Password reset successful" })
+  resetPassword(@Body() data: ResetPasswordDto) {
+    return this.authService.resetPassword(data.token, data.password);
   }
 
   @Get("me")
