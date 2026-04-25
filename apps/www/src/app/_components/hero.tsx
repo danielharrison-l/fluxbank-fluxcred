@@ -19,15 +19,12 @@ export function Hero() {
             Crédito mais justo para quem trabalha por conta própria
           </h1>
           <p className="max-w-2xl text-balance text-lg leading-relaxed text-muted-foreground md:text-xl">
-            Conecte suas contas, gere seu score e solicite credito com uma
+            Conecte suas contas, gere seu score e solicite crédito com uma
             análise baseada no seu fluxo financeiro real.
           </p>
-          <div className="flex flex-col items-center gap-4 pt-5 sm:flex-row">
+          <div className="hidden items-center gap-4 pt-5 sm:flex sm:flex-row">
             <Button asChild size="lg">
-              <a
-                href="/register?view=form"
-                className="flex items-center gap-2"
-              >
+              <a href="/register?view=form" className="flex items-center gap-2">
                 Criar conta
                 <ArrowRight className="h-4 w-4" />
               </a>

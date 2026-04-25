@@ -64,7 +64,10 @@ export function OpenSource() {
                 variant="outline"
                 className="self-center lg:self-start"
               >
-                <a href="/register?view=form" className="flex items-center gap-2">
+                <a
+                  href="/register?view=form"
+                  className="flex items-center gap-2"
+                >
                   <CodeXml className="h-4 w-4" />
                   Começar agora
                 </a>
@@ -88,13 +91,13 @@ export function OpenSource() {
                   <pre className="text-xs leading-relaxed">
                     <code className="text-muted-foreground">
                       <span className="text-blue-400">const</span> score ={" "}
-                      <span className="text-yellow-400">calcularScore</span>
-                      ({"{"}
+                      <span className="text-yellow-400">calcularScore</span>(
+                      {"{"}
                       {"\n  "}renda: "recorrente",
                       {"\n  "}gastos: "saudáveis",
                       {"\n  "}saldo: "estável"
                       {"\n}"}){"\n\n"}
-                      <span className="text-purple-400">await</span> credito.
+                      <span className="text-purple-400">await</span> crédito.
                       <span className="text-yellow-400">solicitar</span>({"{"}
                       {"\n  "}limiteRecomendado: score.limite
                       {"\n}"})
