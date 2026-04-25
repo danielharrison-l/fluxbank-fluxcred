@@ -4,12 +4,14 @@ import {
   Bell,
   Building2,
   CheckCircle2,
+  CreditCard,
   HelpCircle,
   Home,
   Landmark,
   LayoutDashboard,
   Link2,
   List,
+  LogOut,
   Plus,
   ReceiptText,
   RefreshCw,
@@ -20,125 +22,103 @@ import {
   User,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiRequest as authenticatedApiRequest } from "@/lib/api";
-
-const banks = [
-  { name: "Itaú", initials: "I", className: "bg-orange-500 text-white" },
-  { name: "Bradesco", initials: "B", className: "bg-red-600 text-white" },
-  { name: "Nubank", initials: "N", className: "bg-purple-700 text-white" },
-  {
-    name: "Banco do Brasil",
-    initials: "BB",
-    className: "bg-yellow-400 text-slate-900",
-  },
-  { name: "Santander", initials: "S", className: "bg-red-500 text-white" },
-  { name: "Caixa", initials: "C", className: "bg-blue-600 text-white" },
-  { name: "Inter", initials: "IN", className: "bg-orange-600 text-white" },
-  { name: "Outro", initials: "+", className: "bg-slate-100 text-slate-400" },
-];
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Transações", href: "/transactions", icon: ReceiptText },
+  { label: "Análise", href: "/analysis", icon: BarChart3 },
+  { label: "Score de Crédito", href: "/credit-score", icon: Landmark },
+  { label: "Solicitar Crédito", href: "/credit-request", icon: CreditCard },
   {
     label: "Instituições",
     href: "/connect-accounts",
     icon: Building2,
     active: true,
   },
-  { label: "Transações", href: "/transactions", icon: ReceiptText },
-  { label: "Análise", href: "/analysis", icon: BarChart3 },
-  { label: "Configurações", href: "/profile", icon: Settings },
 ];
 
 const bottomNavItems = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Atividade", href: "/transactions", icon: List },
-  { label: "Crédito", href: "/credit-request", icon: Landmark, active: true },
+  { label: "Contas", href: "/connect-accounts", icon: Building2, active: true },
   { label: "Análise", href: "/analysis", icon: BarChart3 },
   { label: "Perfil", href: "/profile", icon: User },
 ];
 
+const demoProfiles = [
+  {
+    id: "approved",
+    bank: "Itaú",
+    title: "Perfil aprovado",
+    description:
+      "Renda frequente, gastos controlados e reserva positiva para gerar uma decisão aprovada.",
+    badge: "Aprovado",
+    logoText: "itaú",
+    logoClassName: "bg-[#003399] text-[#ff7a00]",
+    className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  },
+  {
+    id: "rejected",
+    bank: "Santander",
+    title: "Perfil não aprovado",
+    description:
+      "Baixa frequência de renda e alto comprometimento para simular recusa.",
+    badge: "Recusado",
+    logoText: "SAN",
+    logoClassName: "bg-[#ec0000] text-white",
+    className: "border-red-200 bg-red-50 text-red-700",
+  },
+] as const;
+
+type DemoProfile = (typeof demoProfiles)[number]["id"];
 type ConnectionStatus = "idle" | "loading" | "success" | "error";
 
-type PluggyItem = {
+type DemoItem = {
   pluggyItemId: string;
   institutionName?: string | null;
   lastSuccessfulSyncAt?: string | null;
   errorMessage?: string | null;
 };
 
-type PluggyConnectSuccess = {
-  item?: { id?: string };
-  itemId?: string;
-  id?: string;
+type DemoConnectResponse = {
+  profile: DemoProfile;
+  item: DemoItem;
+  score: {
+    score: number;
+    decision: "APPROVED" | "REJECTED";
+    recommendedLimit: string | number;
+  };
+  creditRequest: {
+    status: "APPROVED" | "REJECTED" | "PENDING";
+    requestedAmount: string | number;
+    approvedAmount?: string | number | null;
+  };
 };
-
-type PluggyConnectError = {
-  message?: string;
-};
-
-type PluggyConnectConstructor = new (config: {
-  connectToken: string;
-  includeSandbox?: boolean;
-  allowFullscreen?: boolean;
-  theme?: "light" | "dark";
-  onSuccess?: (data: PluggyConnectSuccess) => void | Promise<void>;
-  onError?: (error: PluggyConnectError) => void;
-}) => {
-  init: () => Promise<void>;
-};
-
-declare global {
-  interface Window {
-    PluggyConnect?: PluggyConnectConstructor;
-  }
-}
-
-async function loadPluggyConnect() {
-  if (window.PluggyConnect) {
-    return window.PluggyConnect;
-  }
-
-  await new Promise<void>((resolve, reject) => {
-    const existingScript = document.querySelector<HTMLScriptElement>(
-      'script[data-pluggy-connect="true"]',
-    );
-
-    if (existingScript) {
-      existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener("error", () => reject(), { once: true });
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src =
-      "https://cdn.pluggy.ai/pluggy-connect/latest/pluggy-connect.js";
-    script.async = true;
-    script.dataset.pluggyConnect = "true";
-    script.onload = () => resolve();
-    script.onerror = () =>
-      reject(new Error("Não foi possível carregar o Pluggy Connect"));
-    document.body.appendChild(script);
-  });
-
-  if (!window.PluggyConnect) {
-    throw new Error("Pluggy Connect não está disponível");
-  }
-
-  return window.PluggyConnect;
-}
 
 export default function ConnectAccountsPage() {
+  const navigate = useNavigate();
   const [status, setStatus] = useState<ConnectionStatus>("idle");
-  const [connectedItem, setConnectedItem] = useState<PluggyItem | null>(null);
+  const [selectedProfile, setSelectedProfile] =
+    useState<DemoProfile>("approved");
+  const [connectedItem, setConnectedItem] = useState<DemoItem | null>(null);
+  const [demoResult, setDemoResult] = useState<DemoConnectResponse | null>(
+    null,
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
+  const selectedProfileData =
+    demoProfiles.find((profile) => profile.id === selectedProfile) ??
+    demoProfiles[0];
 
   const apiRequest = useCallback(authenticatedApiRequest, []);
 
   useEffect(() => {
-    apiRequest<PluggyItem[]>("/pluggy/items")
+    apiRequest<DemoItem[]>("/pluggy/items")
       .then((items) => {
         const [item] = items;
 
@@ -149,68 +129,52 @@ export default function ConnectAccountsPage() {
         }
       })
       .catch(() => {
-        // The page can still render for unauthenticated users; the CTA explains it.
+        // The page can still render; protected actions will request login.
       });
   }, [apiRequest]);
 
-  async function handleConnect() {
+  async function handleConnect(profile: DemoProfile) {
+    setSelectedProfile(profile);
     setStatus("loading");
     setErrorMessage(null);
 
     try {
-      const [{ connectToken }, PluggyConnect] = await Promise.all([
-        apiRequest<{ connectToken: string }>("/pluggy/connect-token", {
-          method: "POST",
-        }),
-        loadPluggyConnect(),
-      ]);
-
-      const pluggyConnect = new PluggyConnect({
-        connectToken,
-        includeSandbox: false,
-        allowFullscreen: true,
-        theme: "light",
-        onSuccess: async (data) => {
-          const itemId = data.item?.id ?? data.itemId ?? data.id;
-
-          if (!itemId) {
-            setStatus("error");
-            setErrorMessage("A Pluggy não retornou o item conectado.");
-            return;
-          }
-
-          try {
-            const item = await apiRequest<PluggyItem>("/pluggy/items", {
-              method: "POST",
-              body: JSON.stringify({ itemId }),
-            });
-
-            setConnectedItem(item);
-            await apiRequest(`/pluggy/sync/${itemId}`, { method: "POST" });
-            setStatus("success");
-          } catch (error) {
-            setStatus("error");
-            setErrorMessage(
-              error instanceof Error
-                ? error.message
-                : "A instituição foi conectada, mas a sincronização falhou.",
-            );
-          }
-        },
-        onError: (error) => {
-          setStatus("error");
-          setErrorMessage(error.message ?? "Falha na autenticação com o banco.");
-        },
+      const response = await apiRequest<DemoConnectResponse>("/demo/connect", {
+        method: "POST",
+        body: JSON.stringify({ profile }),
       });
 
-      await pluggyConnect.init();
+      setConnectedItem(response.item);
+      setDemoResult(response);
+      setStatus("success");
     } catch (error) {
       setStatus("error");
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Não foi possível iniciar a conexão.",
+          : "Não foi possível gerar os dados demonstrativos.",
       );
+    }
+  }
+
+  async function handleReset() {
+    setIsResetting(true);
+    setErrorMessage(null);
+
+    try {
+      await apiRequest("/demo/reset", { method: "POST" });
+      setConnectedItem(null);
+      setDemoResult(null);
+      setStatus("idle");
+    } catch (error) {
+      setStatus("error");
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível limpar os dados demonstrativos.",
+      );
+    } finally {
+      setIsResetting(false);
     }
   }
 
@@ -237,7 +201,7 @@ export default function ConnectAccountsPage() {
                   key={item.label}
                   className={
                     item.active
-                      ? "flex items-center gap-3 rounded-lg border-r-4 border-[#00766d] bg-[#e8f7f4] px-4 py-3 font-bold text-[#00766d]"
+                      ? "flex items-center gap-3 rounded-lg border-r-4 border-[#00766d] bg-[#e8f7f4] px-4 py-3 font-bold text-[#00766d] transition-colors hover:bg-[#d9f1ed]"
                       : "flex items-center gap-3 rounded-lg px-4 py-3 text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#00766d]"
                   }
                 >
@@ -248,11 +212,30 @@ export default function ConnectAccountsPage() {
             })}
           </nav>
 
-          <div className="mt-auto border-t border-slate-100 pt-5">
-            <Button className="h-12 w-full rounded-xl bg-[#00766d] font-bold text-white hover:bg-[#005f58]">
-              <Plus className="size-5" aria-hidden="true" />
-              Novo Empréstimo
+          <div className="mt-auto space-y-1 border-t border-slate-100 pt-5">
+            <Button
+              asChild
+              className="mb-4 h-12 w-full rounded-xl bg-[#00766d] font-bold text-white hover:bg-[#005f58]"
+            >
+              <a href="/credit-request">
+                <Plus className="size-5" aria-hidden="true" />
+                Novo empréstimo
+              </a>
             </Button>
+            <a
+              href="/profile"
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#00766d]"
+            >
+              <Settings className="size-5" aria-hidden="true" />
+              Configurações
+            </a>
+            <a
+              href="/logout"
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50 hover:text-red-600"
+            >
+              <LogOut className="size-5" aria-hidden="true" />
+              Sair
+            </a>
           </div>
         </div>
       </aside>
@@ -282,14 +265,14 @@ export default function ConnectAccountsPage() {
               </div>
               <button
                 type="button"
-                className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
+                className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#00766d]"
                 aria-label="Ajuda"
               >
                 <HelpCircle className="size-5" aria-hidden="true" />
               </button>
               <button
                 type="button"
-                className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
+                className="flex size-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#00766d]"
                 aria-label="Notificações"
               >
                 <Bell className="size-5" aria-hidden="true" />
@@ -306,16 +289,17 @@ export default function ConnectAccountsPage() {
             <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
               <div>
                 <h1 className="font-mono text-2xl font-semibold text-slate-950">
-                  Conectar conta
+                  Conectar conta demo
                 </h1>
                 <p className="mt-2 max-w-xl text-base leading-7 text-[#506383]">
-                  Utilizamos o Pluggy para uma conexão segura via Open Finance.
+                  Escolha um banco demonstrativo para gerar contas, transações,
+                  métricas, score e pedido de crédito mockados.
                 </p>
               </div>
 
               <div className="inline-flex items-center gap-2 rounded-lg border border-[#c8f1ec] bg-[#eefdfa] px-4 py-3 text-xs font-bold uppercase tracking-[0.08em] text-[#00766d]">
                 <ShieldCheck className="size-5" aria-hidden="true" />
-                Dados criptografados
+                Modo demonstração
               </div>
             </div>
 
@@ -324,62 +308,79 @@ export default function ConnectAccountsPage() {
                 <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                   <div className="border-b border-slate-100 p-6">
                     <h2 className="font-mono text-xl font-semibold text-slate-900">
-                      Selecione sua instituição
+                      Escolha o perfil financeiro
                     </h2>
                     <p className="mt-1 text-sm leading-6 text-[#506383]">
-                      Busque ou escolha um dos bancos parceiros abaixo.
+                      Cada opção substitui os dados financeiros atuais do
+                      usuário por um histórico demo coerente.
                     </p>
                   </div>
 
-                  <div className="p-6">
-                    <div className="relative mb-6">
-                      <Search
-                        className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-slate-400"
-                        aria-hidden="true"
-                      />
-                      <Input
-                        placeholder="Buscar banco..."
-                        className="h-12 rounded-lg border-slate-200 bg-white pl-12 shadow-none focus-visible:ring-[#00766d]"
-                      />
-                    </div>
+                  <div className="grid gap-4 p-6 md:grid-cols-3">
+                    {demoProfiles.map((profile) => {
+                      const isSelected = selectedProfile === profile.id;
+                      const isLoading =
+                        status === "loading" && selectedProfile === profile.id;
 
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
-                      {banks.map((bank) => (
+                      return (
                         <button
                           type="button"
-                          key={bank.name}
-                          className="group flex min-h-28 flex-col items-center justify-center gap-3 rounded-xl border border-slate-100 bg-white p-4 transition-all hover:border-[#00766d] hover:bg-[#ecfbf8]"
+                          key={profile.id}
+                          onClick={() => handleConnect(profile.id)}
+                          disabled={status === "loading" || isResetting}
+                          className={cn(
+                            "group flex min-h-64 flex-col rounded-xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#00766d] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70",
+                            isSelected
+                              ? "border-[#00766d] ring-2 ring-[#d9fbf5]"
+                              : "border-slate-200",
+                          )}
                         >
-                          <span
-                            className={`flex size-12 items-center justify-center rounded-lg text-sm font-bold shadow-sm ${bank.className}`}
+                          <div
+                            className={cn(
+                              "mb-5 flex size-14 items-center justify-center rounded-xl text-base font-black shadow-sm",
+                              profile.logoClassName,
+                            )}
+                            aria-hidden="true"
                           >
-                            {bank.initials}
-                          </span>
-                          <span className="text-center text-sm font-medium text-slate-700 group-hover:text-[#00766d]">
-                            {bank.name}
+                            {profile.logoText}
+                          </div>
+                          <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+                            {profile.bank}
+                          </p>
+                          <div className="mb-3 inline-flex w-fit rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 transition-colors group-hover:bg-[#e8f7f4] group-hover:text-[#00766d]">
+                            {profile.badge}
+                          </div>
+                          <h3 className="font-mono text-lg font-semibold text-slate-950">
+                            {profile.title}
+                          </h3>
+                          <p className="mt-3 flex-1 text-sm leading-6 text-[#506383]">
+                            {profile.description}
+                          </p>
+                          <span className="mt-5 inline-flex h-10 items-center justify-center rounded-lg bg-[#00766d] px-4 text-sm font-bold text-white transition-colors group-hover:bg-[#005f58]">
+                            {isLoading ? "Gerando..." : "Usar este perfil"}
                           </span>
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
 
                   <div className="flex flex-col gap-4 border-t border-slate-100 bg-slate-50 p-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                        Tecnologia
+                        Fonte
                       </span>
                       <span className="text-sm font-bold text-[#506383]">
-                        Pluggy
+                        Dados mockados locais
                       </span>
                     </div>
                     <Button
-                      onClick={handleConnect}
-                      disabled={status === "loading"}
-                      className="h-12 rounded-xl bg-[#00766d] px-7 font-bold text-white shadow-lg shadow-[#00766d]/20 hover:bg-[#005f58]"
+                      type="button"
+                      variant="outline"
+                      onClick={handleReset}
+                      disabled={isResetting || status === "loading"}
+                      className="h-11 rounded-xl border-slate-200 px-5 font-bold text-slate-700 hover:border-red-200 hover:bg-red-50 hover:text-red-700"
                     >
-                      {status === "loading"
-                        ? "Conectando..."
-                        : "Conectar instituição"}
+                      {isResetting ? "Limpando..." : "Limpar dados demo"}
                     </Button>
                   </div>
                 </section>
@@ -387,26 +388,29 @@ export default function ConnectAccountsPage() {
                 <div className="grid gap-4">
                   {status === "idle" && (
                     <div className="rounded-xl border border-[#c8f1ec] bg-[#eefdfa] p-5 text-sm leading-6 text-[#00766d]">
-                      Selecione uma instituição e inicie a conexão segura via
-                      Pluggy.
+                      Selecione um perfil para popular o ambiente com dados de
+                      demonstração.
                     </div>
                   )}
                   {status === "loading" && (
                     <div className="rounded-xl border border-l-4 border-slate-100 border-l-[#14b8a6] bg-white p-5 shadow-sm">
                       <div className="mb-3 flex items-center gap-3">
                         <span className="flex size-10 items-center justify-center rounded-full bg-[#d9fbf5] text-[#00766d]">
-                          <RefreshCw className="size-5" aria-hidden="true" />
+                          <RefreshCw
+                            className="size-5 animate-spin"
+                            aria-hidden="true"
+                          />
                         </span>
                         <h3 className="text-sm font-bold text-[#006d77]">
-                          Sincronização em andamento
+                          Gerando histórico demonstrativo
                         </h3>
                       </div>
                       <p className="text-xs leading-6 text-[#506383]">
-                        Estamos buscando suas contas. Isso pode levar alguns
-                        segundos enquanto validamos as permissões.
+                        Estamos criando contas, transações, métricas, score e
+                        solicitação de crédito para o perfil escolhido.
                       </p>
                       <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                        <div className="h-full w-[65%] rounded-full bg-[#14b8a6]" />
+                        <div className="h-full w-[70%] rounded-full bg-[#14b8a6]" />
                       </div>
                     </div>
                   )}
@@ -421,17 +425,17 @@ export default function ConnectAccountsPage() {
                           />
                         </span>
                         <h3 className="text-sm font-bold text-red-900">
-                          Erro na conexão
+                          Erro ao gerar demo
                         </h3>
                       </div>
                       <p className="text-xs leading-6 text-[#506383]">
                         {errorMessage ??
-                          "Não foi possível sincronizar agora. Verifique sua conexão ou tente novamente mais tarde."}
+                          "Não foi possível preparar os dados agora."}
                       </p>
                       <button
                         type="button"
-                        onClick={handleConnect}
-                        className="mt-4 flex items-center gap-1 text-xs font-bold text-red-600 hover:underline"
+                        onClick={() => handleConnect(selectedProfile)}
+                        className="mt-4 flex items-center gap-1 text-xs font-bold text-red-600 transition-colors hover:text-red-700 hover:underline"
                       >
                         Tentar novamente
                         <RefreshCw className="size-3" aria-hidden="true" />
@@ -448,60 +452,90 @@ export default function ConnectAccountsPage() {
                       <CheckCircle2 className="size-7" aria-hidden="true" />
                     </span>
                     <h3 className="font-mono text-lg font-semibold text-slate-950">
-                      Conta conectada com sucesso
+                      Dados demo gerados
                     </h3>
                     <p className="mt-3 text-sm leading-6 text-[#506383]">
-                      Sua conta foi vinculada e seus dados já estão sendo
-                      analisados para sua nova oferta de crédito.
+                      O banco foi vinculado e os dados já podem ser avaliados no
+                      dashboard, análise, score e solicitação de crédito.
                     </p>
 
-                    <div className="mt-6 flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
-                      <span className="flex size-9 items-center justify-center rounded-md bg-orange-500 text-xs font-bold text-white">
-                        I
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-bold text-slate-950">
-                          {connectedItem?.institutionName ?? "Instituição"}
-                        </p>
-                        <p className="mt-1 truncate text-[10px] text-[#506383]">
-                          Conectada via Pluggy
-                        </p>
+                    <div className="mt-6 space-y-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={cn(
+                            "flex size-10 items-center justify-center rounded-md text-xs font-black shadow-sm",
+                            selectedProfileData.logoClassName,
+                          )}
+                        >
+                          {selectedProfileData.logoText}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-bold text-slate-950">
+                            {connectedItem?.institutionName ??
+                              selectedProfileData.bank}
+                          </p>
+                          <p className="mt-1 truncate text-[10px] text-[#506383]">
+                            Conectada via modo demonstração
+                          </p>
+                        </div>
+                        <Link2
+                          className="size-4 text-[#00766d]"
+                          aria-hidden="true"
+                        />
                       </div>
-                      <Link2
-                        className="size-4 text-[#00766d]"
-                        aria-hidden="true"
-                      />
+                      {demoResult && (
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="rounded-md bg-white p-3">
+                            <p className="text-slate-500">Score</p>
+                            <p className="mt-1 font-bold text-slate-950">
+                              {demoResult.score.score}
+                            </p>
+                          </div>
+                          <div className="rounded-md bg-white p-3">
+                            <p className="text-slate-500">Pedido</p>
+                            <p className="mt-1 font-bold text-slate-950">
+                              {demoResult.creditRequest.status}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
+
+                    <Button
+                      type="button"
+                      onClick={() => navigate("/dashboard")}
+                      className="mt-5 h-11 w-full rounded-xl bg-[#00766d] font-bold text-white hover:bg-[#005f58]"
+                    >
+                      Ver dashboard
+                    </Button>
                   </div>
                 )}
 
                 <div className="relative overflow-hidden rounded-xl bg-[#00766d] p-6 text-white shadow-xl">
                   <div className="relative z-10">
                     <h3 className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#9ff0fb]">
-                      Por que conectar?
+                      Como usar
                     </h3>
                     <p className="mb-4 font-mono text-xl font-semibold leading-snug">
-                      Aumente suas chances de aprovação em até 45%
+                      Teste os dois resultados principais do produto
                     </p>
                     <p className="mb-6 text-xs leading-6 text-white/85">
-                      Ao compartilhar seu histórico, conseguimos oferecer taxas
-                      personalizadas e limites maiores.
+                      Cada perfil gera uma massa de dados completa para validar
+                      a experiência sem depender de uma conta real do Pluggy.
                     </p>
 
                     <ul className="space-y-4 text-xs font-medium">
-                      {[
-                        "Análise em tempo real",
-                        "Sem burocracia de papelada",
-                        "Você tem controle total dos dados",
-                      ].map((item) => (
-                        <li className="flex items-start gap-3" key={item}>
-                          <CheckCircle2
-                            className="size-4 shrink-0 text-[#9ff0fb]"
-                            aria-hidden="true"
-                          />
-                          {item}
-                        </li>
-                      ))}
+                      {["Aprovação automática", "Recusa por risco"].map(
+                        (item) => (
+                          <li className="flex items-start gap-3" key={item}>
+                            <CheckCircle2
+                              className="size-4 shrink-0 text-[#9ff0fb]"
+                              aria-hidden="true"
+                            />
+                            {item}
+                          </li>
+                        ),
+                      )}
                     </ul>
                   </div>
 
@@ -526,8 +560,8 @@ export default function ConnectAccountsPage() {
               key={item.label}
               className={
                 item.active
-                  ? "flex flex-col items-center rounded-xl bg-[#e8f7f4] px-3 py-1 text-[#00766d]"
-                  : "flex flex-col items-center px-2 py-1 text-slate-400"
+                  ? "flex flex-col items-center rounded-xl bg-[#e8f7f4] px-3 py-1 text-[#00766d] transition-colors hover:bg-[#d9f1ed]"
+                  : "flex flex-col items-center rounded-xl px-2 py-1 text-slate-400 transition-colors hover:bg-slate-50 hover:text-[#00766d]"
               }
             >
               <Icon className="size-5" aria-hidden="true" />
