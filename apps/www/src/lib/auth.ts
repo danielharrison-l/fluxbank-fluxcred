@@ -1,25 +1,17 @@
 const authTokenKeys = ["accessToken", "token", "fluxcred.accessToken"];
+let accessTokenMemory: string | null = null;
 
 export function getStoredAccessToken() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return authTokenKeys
-    .map((key) => window.localStorage.getItem(key))
-    .find(Boolean) ?? null;
+  return accessTokenMemory;
 }
 
 export function storeAccessToken(accessToken: string) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.localStorage.setItem("accessToken", accessToken);
-  window.localStorage.setItem("fluxcred.accessToken", accessToken);
+  accessTokenMemory = accessToken;
 }
 
 export function clearAuthSession() {
+  accessTokenMemory = null;
+
   if (typeof window === "undefined") {
     return;
   }

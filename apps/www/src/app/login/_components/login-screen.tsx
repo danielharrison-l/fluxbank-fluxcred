@@ -12,8 +12,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { storeAccessToken } from "@/lib/auth";
 import { getApiBaseUrl, parseJsonResponse } from "@/lib/api";
+import { storeAccessToken } from "@/lib/auth";
 
 export function LoginScreen() {
   const navigate = useNavigate();
@@ -32,7 +32,9 @@ export function LoginScreen() {
 
     const formData = new FormData(event.currentTarget);
     const apiBaseUrl = getApiBaseUrl();
-    const email = String(formData.get("email") ?? "").trim().toLowerCase();
+    const email = String(formData.get("email") ?? "")
+      .trim()
+      .toLowerCase();
 
     try {
       const response = await fetch(`${apiBaseUrl}/auth/login`, {

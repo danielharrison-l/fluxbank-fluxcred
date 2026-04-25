@@ -1,4 +1,8 @@
-import { clearAuthSession, getStoredAccessToken, storeAccessToken } from "./auth";
+import {
+  clearAuthSession,
+  getStoredAccessToken,
+  storeAccessToken,
+} from "./auth";
 
 declare global {
   interface Window {
@@ -47,7 +51,9 @@ function isLoopbackOrPrivateHost(hostname: string) {
 }
 
 function isLocalDevelopmentHost(hostname: string) {
-  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  return (
+    hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1"
+  );
 }
 
 export function getApiBaseUrl() {
@@ -128,6 +134,18 @@ async function refreshAccessToken() {
   })();
 
   return refreshPromise;
+}
+
+export async function ensureAuthenticatedSession() {
+  const storedAccessToken = getStoredAccessToken();
+
+  if (storedAccessToken) {
+    return true;
+  }
+
+  const refreshedAccessToken = await refreshAccessToken();
+
+  return Boolean(refreshedAccessToken);
 }
 
 export async function apiRequest<T>(path: string, init?: RequestInit) {
