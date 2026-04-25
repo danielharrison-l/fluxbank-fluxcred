@@ -1,10 +1,10 @@
-import { EyeOff, LogIn, ShieldCheck, UserPlus } from "lucide-react";
+import { Eye, EyeOff, LogIn, ShieldCheck, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { apiBaseUrl } from "@/lib/api";
+import { apiBaseUrl, parseJsonResponse } from "@/lib/api";
 
 type AuthFormMode = "login" | "register";
 
@@ -22,6 +22,7 @@ export function LoginForm({
   const Icon = isLogin ? LogIn : UserPlus;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,10 +62,14 @@ export function LoginForm({
       });
 
       if (!response.ok) {
-        const data = await response.json().catch(() => null);
+        const data = await parseJsonResponse<{ message?: string | string[] }>(
+          response,
+        ).catch(() => null);
         const message =
           typeof data?.message === "string"
             ? data.message
+            : Array.isArray(data?.message)
+              ? data.message.join(", ")
             : "Nao foi possivel criar sua conta.";
         throw new Error(
           message === "Email already registered"
@@ -73,9 +78,9 @@ export function LoginForm({
         );
       }
 
-      const data = (await response.json()) as { accessToken?: string };
+      const data = await parseJsonResponse<{ accessToken?: string }>(response);
 
-      if (!data.accessToken) {
+      if (!data?.accessToken) {
         throw new Error("A API nao retornou o token de acesso.");
       }
 
@@ -126,7 +131,7 @@ export function LoginForm({
                 id="name"
                 name="name"
                 type="text"
-                placeholder="Daniel Lima"
+                placeholder="Marina Costa"
                 autoComplete="name"
                 className="h-12 rounded-lg border-[#bec8ca] bg-[#f1f4f4] px-4 text-base shadow-none focus-visible:ring-primary"
               />
@@ -163,7 +168,7 @@ export function LoginForm({
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="+55 11 99999-9999"
+                  placeholder="11 99999-9999"
                   autoComplete="tel"
                   className="h-12 rounded-lg border-[#bec8ca] bg-[#f1f4f4] px-4 text-base shadow-none focus-visible:ring-primary"
                 />
@@ -201,17 +206,23 @@ export function LoginForm({
               <Input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder={isLogin ? "Sua senha" : "Minimo de 8 caracteres"}
                 autoComplete={isLogin ? "current-password" : "new-password"}
                 className="h-12 rounded-lg border-[#bec8ca] bg-[#f1f4f4] px-4 pr-12 text-base shadow-none focus-visible:ring-primary"
               />
               <button
                 type="button"
+                onClick={() => setShowPassword((current) => !current)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3e494a] transition-colors hover:text-primary"
-                aria-label="Mostrar senha"
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                aria-pressed={showPassword}
               >
-                <EyeOff className="size-5" aria-hidden="true" />
+                {showPassword ? (
+                  <EyeOff className="size-5" aria-hidden="true" />
+                ) : (
+                  <Eye className="size-5" aria-hidden="true" />
+                )}
               </button>
             </div>
           </div>

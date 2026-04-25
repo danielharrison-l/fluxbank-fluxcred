@@ -1,15 +1,24 @@
-import { CircleHelp, Lock, ShieldCheck, User, WalletCards } from "lucide-react";
+import {
+  CircleHelp,
+  Eye,
+  EyeOff,
+  Lock,
+  ShieldCheck,
+  User,
+  WalletCards,
+} from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { apiBaseUrl } from "@/lib/api";
+import { apiBaseUrl, parseJsonResponse } from "@/lib/api";
 
 export function LoginScreen() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,9 +41,9 @@ export function LoginScreen() {
         throw new Error("E-mail ou senha invalidos.");
       }
 
-      const data = (await response.json()) as { accessToken?: string };
+      const data = await parseJsonResponse<{ accessToken?: string }>(response);
 
-      if (!data.accessToken) {
+      if (!data?.accessToken) {
         throw new Error("A API nao retornou o token de acesso.");
       }
 
@@ -122,11 +131,24 @@ export function LoginScreen() {
                 <Input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="h-14 rounded-lg border-[#d5e0eb] bg-[#f8fafc] pl-16 pr-4 text-lg text-[#506383] shadow-none placeholder:text-[#69778b] focus-visible:ring-[#0c9a8d]"
+                  className="h-14 rounded-lg border-[#d5e0eb] bg-[#f8fafc] pl-16 pr-14 text-lg text-[#506383] shadow-none placeholder:text-[#69778b] focus-visible:ring-[#0c9a8d]"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[#69778b] transition-colors hover:text-[#0c9a8d]"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-5" aria-hidden="true" />
+                  ) : (
+                    <Eye className="size-5" aria-hidden="true" />
+                  )}
+                </button>
               </div>
             </div>
 

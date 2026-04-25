@@ -13,6 +13,16 @@ export function getAccessToken() {
   );
 }
 
+export async function parseJsonResponse<T>(response: Response) {
+  const text = await response.text();
+
+  if (!text.trim()) {
+    return null as T | null;
+  }
+
+  return JSON.parse(text) as T;
+}
+
 export async function apiRequest<T>(path: string, init?: RequestInit) {
   const accessToken = getAccessToken();
 
@@ -30,15 +40,19 @@ export async function apiRequest<T>(path: string, init?: RequestInit) {
   });
 
   if (!response.ok) {
-    const data = await response.json().catch(() => null);
+    const data = await parseJsonResponse<{ message?: string | string[] }>(
+      response,
+    ).catch(() => null);
     const message =
       typeof data?.message === "string"
         ? data.message
+        : Array.isArray(data?.message)
+          ? data.message.join(", ")
         : "Nao foi possivel concluir a requisicao.";
     throw new Error(message);
   }
 
-  return response.json() as Promise<T>;
+  return parseJsonResponse<T>(response) as Promise<T>;
 }
 
 export function formatCurrency(value?: number | string | null) {
