@@ -55,6 +55,22 @@ const bottomNavItems = [
   { label: "Perfil", icon: User },
 ];
 
+const navItemHrefByLabel: Record<string, string> = {
+  Dashboard: "/dashboard",
+  "InstituiÃ§Ãµes": "/connect-accounts",
+  "TransaÃ§Ãµes": "/transactions",
+  "AnÃ¡lise": "/credit-score",
+  "ConfiguraÃ§Ãµes": "/dashboard",
+};
+
+const bottomNavHrefByLabel: Record<string, string> = {
+  Home: "/dashboard",
+  Atividade: "/transactions",
+  "CrÃ©dito": "/credit-request",
+  "AnÃ¡lise": "/credit-score",
+  Perfil: "/dashboard",
+};
+
 type ConnectionStatus = "idle" | "loading" | "success" | "error";
 
 type PluggyItem = {
@@ -268,7 +284,7 @@ export default function ConnectAccountsPage() {
 
               return (
                 <a
-                  href="/connect-accounts"
+                  href={navItemHrefByLabel[item.label] ?? "/connect-accounts"}
                   key={item.label}
                   className={
                     item.active
@@ -512,7 +528,7 @@ export default function ConnectAccountsPage() {
 
           return (
             <a
-              href="/connect-accounts"
+              href={bottomNavHrefByLabel[item.label] ?? "/connect-accounts"}
               key={item.label}
               className={
                 item.active
