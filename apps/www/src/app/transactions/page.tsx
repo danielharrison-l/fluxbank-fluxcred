@@ -66,11 +66,26 @@ type Transaction = {
   transactionDate: string;
 };
 
+type PaginatedTransactions = {
+  items: Transaction[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 type FilterPreset = "mes-atual" | "ultimos-30" | "personalizado";
 
 const sideNavItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Transações", href: "/transactions", icon: ReceiptText, active: true },
+  {
+    label: "Transações",
+    href: "/transactions",
+    icon: ReceiptText,
+    active: true,
+  },
   { label: "Score de Crédito", href: "/credit-score", icon: Gauge },
   { label: "Solicitar Crédito", href: "/credit-request", icon: CreditCard },
   { label: "Instituições", href: "/connect-accounts", icon: Building2 },
@@ -79,7 +94,12 @@ const sideNavItems = [
 const mobileNavItems = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Atividade", href: "/transactions", icon: List, active: true },
-  { label: "Solicitar", href: "/credit-request", icon: CirclePlus, primary: true },
+  {
+    label: "Solicitar",
+    href: "/credit-request",
+    icon: CirclePlus,
+    primary: true,
+  },
   { label: "Score", href: "/credit-score", icon: Gauge },
   { label: "Perfil", href: "/profile", icon: User },
 ];
@@ -205,14 +225,6 @@ function formatDateTime(value?: string | null) {
   }).format(new Date(value));
 }
 
-function formatDateInputValue(value?: string | undefined) {
-  if (!value) {
-    return "";
-  }
-
-  return new Date(value).toISOString().slice(0, 10);
-}
-
 function downloadCsv(filename: string, rows: string[][]) {
   const csv = rows
     .map((row) =>
@@ -281,6 +293,8 @@ export default function TransactionsPage() {
       }
     }
 
+    params.set("pageSize", "500");
+
     const queryString = params.toString();
 
     return queryString ? `/transactions?${queryString}` : "/transactions";
@@ -298,26 +312,31 @@ export default function TransactionsPage() {
       appliedFrom,
       appliedTo,
     ],
-    queryFn: () => apiRequest<Transaction[]>(transactionQuery),
+    queryFn: async () => {
+      const response = await apiRequest<PaginatedTransactions | Transaction[]>(
+        transactionQuery,
+      );
+
+      return Array.isArray(response) ? response : response.items;
+    },
   });
 
   const selectedAccount = useMemo(
     () =>
       selectedAccountId === "todas"
         ? null
-        : accounts.find((account) => account.id === selectedAccountId) ?? null,
+        : (accounts.find((account) => account.id === selectedAccountId) ??
+          null),
     [accounts, selectedAccountId],
   );
 
-  const {
-    data: selectedAccountDetails,
-    isLoading: isLoadingAccountDetails,
-  } = useQuery({
-    queryKey: ["accounts", selectedAccountId, "details"],
-    queryFn: () =>
-      apiRequest<FinancialAccount>(`/accounts/${selectedAccountId}`),
-    enabled: selectedAccountId !== "todas",
-  });
+  const { data: selectedAccountDetails, isLoading: isLoadingAccountDetails } =
+    useQuery({
+      queryKey: ["accounts", selectedAccountId, "details"],
+      queryFn: () =>
+        apiRequest<FinancialAccount>(`/accounts/${selectedAccountId}`),
+      enabled: selectedAccountId !== "todas",
+    });
 
   useEffect(() => {
     if (!accounts.length) {
@@ -494,7 +513,7 @@ export default function TransactionsPage() {
               <a href="/credit-request">Solicitar crédito</a>
             </Button>
             <a
-              href="/dashboard"
+              href="/profile"
               className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
             >
               <Settings className="size-5" aria-hidden="true" />
@@ -613,7 +632,10 @@ export default function TransactionsPage() {
                       : `${accounts.length} conta(s) conectada(s)`}
                   </p>
                 </div>
-                <Landmark className="size-5 text-[#00766d]" aria-hidden="true" />
+                <Landmark
+                  className="size-5 text-[#00766d]"
+                  aria-hidden="true"
+                />
               </div>
 
               <button
@@ -701,9 +723,9 @@ export default function TransactionsPage() {
               <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr_auto]">
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
+                    <span className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
                       Período
-                    </label>
+                    </span>
                     <div className="grid grid-cols-3 rounded-xl border border-slate-200 bg-slate-50 p-1">
                       {[
                         { key: "mes-atual", label: "Este mês" },
@@ -745,13 +767,19 @@ export default function TransactionsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-[#506383]">
+                    <label
+                      htmlFor="transaction-category"
+                      className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-[#506383]"
+                    >
                       Categoria
                     </label>
                     <div className="relative">
                       <select
+                        id="transaction-category"
                         value={draftCategory}
-                        onChange={(event) => setDraftCategory(event.target.value)}
+                        onChange={(event) =>
+                          setDraftCategory(event.target.value)
+                        }
                         className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#181c1d] shadow-sm outline-none focus:ring-2 focus:ring-[#00766d]"
                       >
                         <option value="todas">Todas as categorias</option>
@@ -811,7 +839,8 @@ export default function TransactionsPage() {
                       Lançamentos recentes
                     </h2>
                     <p className="text-sm text-[#506383]">
-                      {filteredTransactions.length} transação(ões) no recorte atual
+                      {filteredTransactions.length} transação(ões) no recorte
+                      atual
                     </p>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-[#506383]">
@@ -863,12 +892,16 @@ export default function TransactionsPage() {
                           >
                             <td className="px-6 py-4 text-xs font-medium text-[#506383]">
                               <div className="flex flex-col">
-                                <span>{formatDate(transaction.transactionDate)}</span>
+                                <span>
+                                  {formatDate(transaction.transactionDate)}
+                                </span>
                                 <span className="text-[11px] text-slate-400">
                                   {new Intl.DateTimeFormat("pt-BR", {
                                     hour: "2-digit",
                                     minute: "2-digit",
-                                  }).format(new Date(transaction.transactionDate))}
+                                  }).format(
+                                    new Date(transaction.transactionDate),
+                                  )}
                                 </span>
                               </div>
                             </td>
@@ -882,9 +915,15 @@ export default function TransactionsPage() {
                                   }
                                 >
                                   {isCredit ? (
-                                    <ArrowUpRight className="size-4" aria-hidden="true" />
+                                    <ArrowUpRight
+                                      className="size-4"
+                                      aria-hidden="true"
+                                    />
                                   ) : (
-                                    <Banknote className="size-4" aria-hidden="true" />
+                                    <Banknote
+                                      className="size-4"
+                                      aria-hidden="true"
+                                    />
                                   )}
                                 </span>
                                 <div>
@@ -892,7 +931,8 @@ export default function TransactionsPage() {
                                     {transaction.description}
                                   </p>
                                   <p className="text-xs text-[#506383]">
-                                    {transaction.merchantName ?? "Movimentação bancária"}
+                                    {transaction.merchantName ??
+                                      "Movimentação bancária"}
                                   </p>
                                 </div>
                               </div>
@@ -919,7 +959,8 @@ export default function TransactionsPage() {
                                     : "text-sm font-bold text-red-600"
                                 }
                               >
-                                {isCredit ? "+" : "-"} {formatCurrency(transaction.amount)}
+                                {isCredit ? "+" : "-"}{" "}
+                                {formatCurrency(transaction.amount)}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right">
@@ -938,16 +979,18 @@ export default function TransactionsPage() {
                           </tr>
                         );
                       })}
-                      {!isLoadingTransactions && filteredTransactions.length === 0 && (
-                        <tr>
-                          <td
-                            colSpan={6}
-                            className="px-6 py-10 text-center text-sm text-[#506383]"
-                          >
-                            Nenhuma transação encontrada para os filtros atuais.
-                          </td>
-                        </tr>
-                      )}
+                      {!isLoadingTransactions &&
+                        filteredTransactions.length === 0 && (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="px-6 py-10 text-center text-sm text-[#506383]"
+                            >
+                              Nenhuma transação encontrada para os filtros
+                              atuais.
+                            </td>
+                          </tr>
+                        )}
                     </tbody>
                   </table>
                 </div>
