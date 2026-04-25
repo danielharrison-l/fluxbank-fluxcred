@@ -15,6 +15,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import type { Request } from "express";
+import { AdminApiKeyGuard } from "@/modules/auth/guards/admin-api-key.guard";
 import { JwtAuthGuard } from "@/modules/auth/guards/jwt-auth.guard";
 import { CreditRequestsService } from "./credit-requests.service";
 import { CreateCreditRequestDto } from "./dto/create-credit-request.dto";
@@ -55,6 +56,7 @@ export class CreditRequestsController {
   }
 
   @Patch(":id/decision")
+  @UseGuards(JwtAuthGuard, AdminApiKeyGuard)
   @ApiOperation({ summary: "Update credit request decision" })
   @ApiResponse({ status: 200, description: "Credit request updated" })
   decide(
