@@ -4,9 +4,8 @@ import {
   Bell,
   Building2,
   CheckCircle2,
-  CreditCard,
   CircleDollarSign,
-  Clock3,
+  CreditCard,
   Gauge,
   HelpCircle,
   Home,
@@ -66,6 +65,8 @@ type CreditRequest = {
   status: "REQUESTED" | "APPROVED" | "REVIEW" | "REJECTED" | "CANCELLED";
   requestedAt: string;
   explanation?: string;
+  monthlyInterestRate?: number | null;
+  nextEligibleRequestAt?: string;
 };
 
 function parseCurrencyInput(value: string) {
@@ -89,46 +90,56 @@ function formatAmountInput(value: string) {
 }
 
 function getRequestStatusMeta(status: CreditRequest["status"]) {
-  switch (status) {
-    case "APPROVED":
-      return {
-        title: "Crédito aprovado",
-        badge: "Aprovado",
-        summary: "O valor aprovado já pode ser liberado na sua conta FluxCred.",
-        rowClassName: "bg-emerald-50 text-emerald-700",
-        cardClassName: "border-emerald-200 bg-emerald-50 text-emerald-800",
-        icon: CheckCircle2,
-      };
-    case "REVIEW":
-    case "REQUESTED":
-      return {
-        title: "Em análise",
-        badge: "Em análise",
-        summary: "Sua solicitação está em revisão e pode exigir validação adicional.",
-        rowClassName: "bg-amber-50 text-amber-700",
-        cardClassName: "border-amber-200 bg-amber-50 text-amber-800",
-        icon: Clock3,
-      };
-    case "CANCELLED":
-      return {
-        title: "Cancelada",
-        badge: "Cancelada",
-        summary: "A solicitação foi cancelada antes da conclusão da análise.",
-        rowClassName: "bg-slate-100 text-slate-600",
-        cardClassName: "border-slate-200 bg-slate-50 text-slate-700",
-        icon: Info,
-      };
-    default:
-      return {
-        title: "Não aprovada",
-        badge: "Negado",
-        summary:
-          "No momento, não foi possível liberar esse valor com base no perfil atual.",
-        rowClassName: "bg-slate-100 text-slate-500",
-        cardClassName: "border-slate-200 bg-slate-50 text-slate-700",
-        icon: XCircle,
-      };
+  if (status === "APPROVED") {
+    return {
+      title: "Crédito aprovado",
+      badge: "Aprovado",
+      summary: "O valor aprovado já pode ser liberado na sua conta FluxCred.",
+      rowClassName: "bg-emerald-50 text-emerald-700",
+      cardClassName: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      icon: CheckCircle2,
+    };
   }
+
+  return {
+    title: "Não aprovada",
+    badge: "Negado",
+    summary:
+      "No momento, não foi possível liberar esse valor com base no perfil atual.",
+    rowClassName: "bg-slate-100 text-slate-500",
+    cardClassName: "border-slate-200 bg-slate-50 text-slate-700",
+    icon: XCircle,
+  };
+}
+
+function getMonthlyInterestRate(score?: number) {
+  if (!score || score < 600) {
+    return null;
+  }
+
+  if (score >= 800) {
+    return 2.49;
+  }
+
+  if (score >= 700) {
+    return 3.19;
+  }
+
+  return 3.89;
+}
+
+function formatPercent(value?: number | null) {
+  if (value == null) {
+    return "Indisponível";
+  }
+
+  return `${value.toFixed(2).replace(".", ",")}%`;
+}
+
+function addMonths(value: string | Date, months: number) {
+  const date = new Date(value);
+  date.setMonth(date.getMonth() + months);
+  return date;
 }
 
 export default function CreditRequestPage() {
@@ -166,6 +177,7 @@ export default function CreditRequestPage() {
 
   const latestScore = data?.latestScore ?? null;
   const requests = data?.creditRequests ?? [];
+  const monthlyInterestRate = getMonthlyInterestRate(latestScore?.score);
 
   const sortedRequests = useMemo(
     () =>
@@ -178,6 +190,22 @@ export default function CreditRequestPage() {
   );
 
   const latestRequest = sortedRequests[0] ?? null;
+  const nextEligibleRequestAt = latestRequest
+    ? new Date(
+        latestRequest.nextEligibleRequestAt ??
+          addMonths(latestRequest.requestedAt, 2),
+      )
+    : null;
+  const canRequestCredit =
+    !nextEligibleRequestAt || nextEligibleRequestAt <= new Date();
+  const cooldownMessage =
+    latestRequest && nextEligibleRequestAt && !canRequestCredit
+      ? `Você já fez uma solicitação em ${formatDate(
+          latestRequest.requestedAt,
+        )}. Uma nova tentativa ficará disponível em ${formatDate(
+          nextEligibleRequestAt,
+        )}.`
+      : null;
 
   const limitUsage = useMemo(() => {
     const recommendedLimit = Number(latestScore?.recommendedLimit ?? 0);
@@ -187,7 +215,10 @@ export default function CreditRequestPage() {
       return 0;
     }
 
-    return Math.max(0, Math.min(100, (latestRequestedAmount / recommendedLimit) * 100));
+    return Math.max(
+      0,
+      Math.min(100, (latestRequestedAmount / recommendedLimit) * 100),
+    );
   }, [latestRequest, latestScore]);
 
   const submitError =
@@ -206,6 +237,14 @@ export default function CreditRequestPage() {
 
     if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
       setValidationError("Informe um valor válido para solicitar crédito.");
+      return;
+    }
+
+    if (!canRequestCredit) {
+      setValidationError(
+        cooldownMessage ??
+          "Aguarde 2 meses entre uma solicitação de crédito e outra.",
+      );
       return;
     }
 
@@ -249,7 +288,7 @@ export default function CreditRequestPage() {
               Nova solicitação
             </Button>
             <a
-              href="/dashboard"
+              href="/profile"
               className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-50"
             >
               <Settings className="size-5" aria-hidden="true" />
@@ -340,7 +379,37 @@ export default function CreditRequestPage() {
                       Limite recomendado
                     </p>
                     <p className="mt-2 font-mono text-4xl font-bold text-[#00766d]">
-                      {isLoading ? "..." : formatCurrency(latestScore?.recommendedLimit)}
+                      {isLoading
+                        ? "..."
+                        : formatCurrency(latestScore?.recommendedLimit)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid gap-3 md:grid-cols-2">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#506383]">
+                      Taxa de juros
+                    </p>
+                    <p className="mt-2 font-mono text-2xl font-bold text-[#181c1d]">
+                      {formatPercent(monthlyInterestRate)} ao mês
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-[#506383]">
+                      Taxa estimada pelo score atual e confirmada na decisão.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#506383]">
+                      Próxima solicitação
+                    </p>
+                    <p className="mt-2 font-mono text-2xl font-bold text-[#181c1d]">
+                      {nextEligibleRequestAt
+                        ? formatDate(nextEligibleRequestAt)
+                        : "Disponível agora"}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-[#506383]">
+                      É permitido enviar um novo pedido a cada 2 meses.
                     </p>
                   </div>
                 </div>
@@ -364,7 +433,9 @@ export default function CreditRequestPage() {
                         placeholder="0,00"
                         value={requestedAmount}
                         onChange={(event) =>
-                          setRequestedAmount(formatAmountInput(event.target.value))
+                          setRequestedAmount(
+                            formatAmountInput(event.target.value),
+                          )
                         }
                         className="h-16 rounded-xl border-slate-200 pl-14 text-3xl font-semibold text-[#506383] shadow-none placeholder:text-[#8ea0b8] focus-visible:ring-[#00766d]"
                       />
@@ -372,78 +443,30 @@ export default function CreditRequestPage() {
                   </div>
 
                   <p className="flex items-start gap-2 text-xs leading-5 text-[#506383]">
-                    <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                    O valor solicitado será analisado em até 24 horas úteis.
+                    <Info
+                      className="mt-0.5 size-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                    {cooldownMessage ??
+                      "O valor solicitado será analisado em até 24 horas úteis."}
                   </p>
 
                   <Button
-                    disabled={createCreditRequest.isPending || !latestScore}
+                    disabled={
+                      createCreditRequest.isPending ||
+                      !latestScore ||
+                      !canRequestCredit
+                    }
                     className="h-14 w-full rounded-xl bg-[#00766d] text-base font-bold text-white hover:bg-[#005f58]"
                   >
                     <CircleDollarSign className="size-5" aria-hidden="true" />
                     {createCreditRequest.isPending
                       ? "Enviando solicitação..."
-                      : "Solicitar crédito"}
+                      : canRequestCredit
+                        ? "Solicitar crédito"
+                        : "Aguarde 2 meses"}
                   </Button>
                 </form>
-              </section>
-
-              <section className="space-y-4">
-                <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-[#8a9ab2]">
-                  Exemplos de status
-                </h2>
-
-                <article className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-                  <div className="flex gap-4">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
-                      <CheckCircle2 className="size-6" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <h3 className="font-semibold text-emerald-800">
-                        Crédito aprovado
-                      </h3>
-                      <p className="mt-1 text-sm leading-6 text-emerald-700">
-                        O valor aprovado fica disponível para liberação após a
-                        validação final da operação.
-                      </p>
-                    </div>
-                  </div>
-                </article>
-
-                <article className="rounded-xl border border-amber-200 bg-amber-50 p-5">
-                  <div className="flex gap-4">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white">
-                      <Clock3 className="size-6" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <h3 className="font-semibold text-amber-800">
-                        Em análise
-                      </h3>
-                      <p className="mt-1 text-sm leading-6 text-amber-700">
-                        Sua solicitação pode exigir revisão manual e uma nova
-                        conferência dos indicadores financeiros.
-                      </p>
-                    </div>
-                  </div>
-                </article>
-
-                <article className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-                  <div className="flex gap-4">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-400 text-white">
-                      <XCircle className="size-6" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <h3 className="font-semibold text-slate-800">
-                        Solicitação não aprovada
-                      </h3>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">
-                        Quando o valor solicitado excede o perfil atual, a
-                        recomendação é reavaliar o montante ou aguardar novo
-                        ciclo de análise.
-                      </p>
-                    </div>
-                  </div>
-                </article>
               </section>
             </div>
 
@@ -459,7 +482,10 @@ export default function CreditRequestPage() {
                       pedidos alinhados ao seu limite recomendado.
                     </p>
                   </div>
-                  <ShieldCheck className="size-6 shrink-0 text-white/80" aria-hidden="true" />
+                  <ShieldCheck
+                    className="size-6 shrink-0 text-white/80"
+                    aria-hidden="true"
+                  />
                 </div>
 
                 <div className="mt-6 rounded-xl bg-white/10 p-4">
@@ -484,6 +510,14 @@ export default function CreditRequestPage() {
                       <p className="text-xs text-white/70">Limite sugerido</p>
                       <p className="font-mono text-xl font-semibold">
                         {formatCurrency(latestScore?.recommendedLimit)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-5 border-t border-white/15 pt-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-xs text-white/70">Taxa de juros</p>
+                      <p className="font-mono text-xl font-semibold">
+                        {formatPercent(monthlyInterestRate)} a.m.
                       </p>
                     </div>
                   </div>
@@ -570,12 +604,26 @@ export default function CreditRequestPage() {
                           </div>
                           <p className="mt-2 text-sm leading-6">
                             Valor solicitado:{" "}
-                            <strong>{formatCurrency(request.requestedAmount)}</strong>
+                            <strong>
+                              {formatCurrency(request.requestedAmount)}
+                            </strong>
                             {request.approvedAmount && (
                               <>
                                 {" "}
                                 · Valor aprovado:{" "}
-                                <strong>{formatCurrency(request.approvedAmount)}</strong>
+                                <strong>
+                                  {formatCurrency(request.approvedAmount)}
+                                </strong>
+                              </>
+                            )}
+                            {request.monthlyInterestRate != null && (
+                              <>
+                                {" "}
+                                · Juros:{" "}
+                                <strong>
+                                  {formatPercent(request.monthlyInterestRate)}{" "}
+                                  a.m.
+                                </strong>
                               </>
                             )}
                           </p>
