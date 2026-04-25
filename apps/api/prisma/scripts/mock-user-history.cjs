@@ -61,7 +61,6 @@ function parseArgs(argv) {
     if (arg === "--months") {
       options.months = Number(argv[index + 1]);
       index += 1;
-      continue;
     }
   }
 
@@ -171,7 +170,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Renda",
       categoryId: "income",
       merchantName: "Empresa FluxCred Demo",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 5), 10),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 5),
+        10,
+      ),
     });
 
     if (sideIncome > 0) {
@@ -189,7 +191,10 @@ function createMonthlyTransactions(accounts, months) {
         category: "Renda extra",
         categoryId: "side-income",
         merchantName: "Cliente recorrente",
-        transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 19), 15),
+        transactionDate: setTime(
+          new Date(start.getFullYear(), start.getMonth(), 19),
+          15,
+        ),
       });
     }
 
@@ -207,7 +212,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Moradia",
       categoryId: "housing",
       merchantName: "Imobiliaria Centro",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 6), 11),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 6),
+        11,
+      ),
     });
 
     checkingBalance -= groceries;
@@ -224,7 +232,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Alimentacao",
       categoryId: "groceries",
       merchantName: "Mercado Bairro",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 8), 18),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 8),
+        18,
+      ),
     });
 
     checkingBalance -= transport;
@@ -241,7 +252,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Transporte",
       categoryId: "transport",
       merchantName: "Uber e afins",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 12), 13),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 12),
+        13,
+      ),
     });
 
     checkingBalance -= utilities;
@@ -258,7 +272,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Servicos",
       categoryId: "utilities",
       merchantName: "Concessionarias",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 14), 9),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 14),
+        9,
+      ),
     });
 
     checkingBalance -= leisure;
@@ -275,7 +292,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Lazer",
       categoryId: "leisure",
       merchantName: "Servicos digitais",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 21), 20),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 21),
+        20,
+      ),
     });
 
     checkingBalance -= software;
@@ -292,7 +312,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Operacao",
       categoryId: "software",
       merchantName: "Ferramentas SaaS",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 23), 10),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 23),
+        10,
+      ),
     });
 
     checkingBalance -= savingsTransfer;
@@ -310,7 +333,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Investimento",
       categoryId: "reserve-transfer",
       merchantName: "Reserva pessoal",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 24), 14),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 24),
+        14,
+      ),
     });
 
     pushTransaction(transactions, {
@@ -326,7 +352,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Reserva",
       categoryId: "reserve",
       merchantName: "Conta reserva",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 24), 14),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 24),
+        14,
+      ),
     });
 
     reserveBalance += reserveYield;
@@ -343,7 +372,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Rendimento",
       categoryId: "yield",
       merchantName: "Reserva remunerada",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 28), 9),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 28),
+        9,
+      ),
     });
 
     creditBalance += cardShopping;
@@ -360,7 +392,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Compras",
       categoryId: "shopping",
       merchantName: "Varejo online",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 11), 16),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 11),
+        16,
+      ),
     });
 
     creditBalance += cardFuel;
@@ -377,7 +412,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Transporte",
       categoryId: "fuel",
       merchantName: "Posto BR",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 16), 19),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 16),
+        19,
+      ),
     });
 
     creditBalance += cardDining;
@@ -394,7 +432,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Alimentacao",
       categoryId: "dining",
       merchantName: "Restaurantes",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 18), 21),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 18),
+        21,
+      ),
     });
 
     checkingBalance -= invoicePayment;
@@ -411,7 +452,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Cartao",
       categoryId: "invoice",
       merchantName: "Cartao principal",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 26), 8),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 26),
+        8,
+      ),
     });
 
     creditBalance = Math.max(0, creditBalance - invoicePayment);
@@ -428,7 +472,10 @@ function createMonthlyTransactions(accounts, months) {
       category: "Pagamento",
       categoryId: "invoice-payment",
       merchantName: "Conta principal",
-      transactionDate: setTime(new Date(start.getFullYear(), start.getMonth(), 26), 8),
+      transactionDate: setTime(
+        new Date(start.getFullYear(), start.getMonth(), 26),
+        8,
+      ),
     });
   }
 
@@ -466,7 +513,10 @@ function calculateFinancialMetric(transactions, periodStart, periodEnd) {
 
   for (const transaction of incomeTransactions) {
     const day = transaction.transactionDate.toISOString().slice(0, 10);
-    incomeByDay.set(day, (incomeByDay.get(day) ?? 0) + Math.abs(transaction.amount));
+    incomeByDay.set(
+      day,
+      (incomeByDay.get(day) ?? 0) + Math.abs(transaction.amount),
+    );
   }
 
   const dailyIncomeTotals = Array.from(incomeByDay.values());
@@ -612,11 +662,7 @@ function buildCreditScore(metric) {
   );
   const score = baseScore * 10;
   const decision =
-    score >= 600
-      ? CreditDecision.APPROVED
-      : score >= 400
-        ? CreditDecision.MANUAL_REVIEW
-        : CreditDecision.REJECTED;
+    score >= 600 ? CreditDecision.APPROVED : CreditDecision.REJECTED;
   const recommendedLimit =
     score >= 800
       ? metric.avgMonthlyIncome * 0.3
@@ -636,9 +682,7 @@ function buildCreditScore(metric) {
     explanation:
       decision === CreditDecision.APPROVED
         ? "Mock score approved from seeded financial history."
-        : decision === CreditDecision.MANUAL_REVIEW
-          ? "Mock score requires review from seeded financial history."
-          : "Mock score rejected from seeded financial history.",
+        : "Mock score rejected from seeded financial history.",
   };
 }
 
@@ -702,7 +746,11 @@ async function main() {
     return;
   }
 
-  if (!Number.isInteger(options.months) || options.months < 1 || options.months > 24) {
+  if (
+    !Number.isInteger(options.months) ||
+    options.months < 1 ||
+    options.months > 24
+  ) {
     throw new Error("--months must be an integer between 1 and 24.");
   }
 
@@ -801,7 +849,10 @@ async function main() {
     }),
   };
 
-  const { transactions, balances } = createMonthlyTransactions(accounts, options.months);
+  const { transactions, balances } = createMonthlyTransactions(
+    accounts,
+    options.months,
+  );
 
   await prisma.transaction.createMany({
     data: transactions.map((transaction) => ({
@@ -829,7 +880,8 @@ async function main() {
     const { start, end } = monthWindow(offset);
     const monthTransactions = transactions.filter(
       (transaction) =>
-        transaction.transactionDate >= start && transaction.transactionDate <= end,
+        transaction.transactionDate >= start &&
+        transaction.transactionDate <= end,
     );
     const metricData = calculateFinancialMetric(monthTransactions, start, end);
     const metric = await prisma.financialMetric.create({
@@ -861,7 +913,7 @@ async function main() {
         creditScoreId: previousScore.id,
         requestedAmount: decimal(previousScore.recommendedLimit * 1.15 || 2500),
         approvedAmount: null,
-        status: CreditRequestStatus.REVIEW,
+        status: CreditRequestStatus.REJECTED,
         requestedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
         decidedAt: new Date(Date.now() - 44 * 24 * 60 * 60 * 1000),
       },
@@ -880,9 +932,7 @@ async function main() {
       status:
         latestScore.decision === CreditDecision.APPROVED
           ? CreditRequestStatus.APPROVED
-          : latestScore.decision === CreditDecision.MANUAL_REVIEW
-            ? CreditRequestStatus.REVIEW
-            : CreditRequestStatus.REJECTED,
+          : CreditRequestStatus.REJECTED,
       requestedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
       decidedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     },

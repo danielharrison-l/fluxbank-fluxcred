@@ -203,10 +203,6 @@ export class CreditScoreService {
       return CreditDecision.APPROVED;
     }
 
-    if (score >= 400) {
-      return CreditDecision.MANUAL_REVIEW;
-    }
-
     return CreditDecision.REJECTED;
   }
 
@@ -230,7 +226,6 @@ export class CreditScoreService {
     decision: CreditDecision,
   ) {
     const hasHealthyExpenses = metric.expenseRatio.toNumber() <= 0.8;
-    const hasStableIncome = metric.incomeStabilityScore.toNumber() >= 70;
     const hasFrequentIncome = metric.incomeFrequencyScore.toNumber() >= 70;
 
     if (decision === CreditDecision.APPROVED) {
@@ -239,14 +234,6 @@ export class CreditScoreService {
       }
 
       return "Seu crédito foi aprovado porque seu histórico financeiro mostra renda suficiente para um limite inicial mais conservador.";
-    }
-
-    if (decision === CreditDecision.MANUAL_REVIEW) {
-      if (!hasStableIncome) {
-        return "Sua solicitação precisa de uma análise adicional porque sua renda apresenta variação relevante nos últimos meses.";
-      }
-
-      return "Sua solicitação precisa de uma análise adicional para confirmarmos alguns pontos do seu perfil financeiro.";
     }
 
     if (metric.expenseRatio.toNumber() > 1) {
