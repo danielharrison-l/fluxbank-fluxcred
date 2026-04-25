@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export function Header() {
@@ -10,12 +9,12 @@ export function Header() {
           className="flex items-center gap-2 text-lg font-semibold"
           aria-label="Loci home"
         >
-          <Image
+          <img
             alt="Loci logo"
             src="/logo.svg"
+            className="dark:invert"
             width={18}
             height={18}
-            className="dark:invert"
           />
           <span className="text-xl">Loci</span>
         </a>

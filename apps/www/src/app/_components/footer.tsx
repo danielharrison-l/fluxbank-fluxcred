@@ -1,5 +1,4 @@
 import { Github } from "lucide-react";
-import Image from "next/image";
 import {
   GITHUB_BOARD_URL,
   GITHUB_PROJECT_URL,
@@ -18,12 +17,12 @@ export function Footer() {
               className="flex items-center gap-2 text-lg font-semibold"
               aria-label="Loci home"
             >
-              <Image
+              <img
                 alt="Loci logo"
                 src="/logo.svg"
+                className="dark:invert"
                 width={18}
                 height={18}
-                className="dark:invert"
               />
               <span className="text-xl">Loci</span>
             </a>

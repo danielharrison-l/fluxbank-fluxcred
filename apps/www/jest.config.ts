@@ -1,8 +1,5 @@
 import baseConfig from "@loci/config/jest";
 import type { Config } from "jest";
-import nextJest from "next/jest.js";
-
-const createJestConfig = nextJest({ dir: "./" });
 
 const config: Config = {
   ...baseConfig,
@@ -14,4 +11,4 @@ const config: Config = {
   ],
 };
 
-export default createJestConfig(config);
+export default config;

@@ -1,7 +1,6 @@
-"use client";
-
 import { LaptopMinimalIcon, MoonIcon, SunIcon } from "lucide-react";
-import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
+import type * as React from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,8 +9,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+type Theme = "light" | "dark" | "system";
+
 export function ThemeSwitcher() {
-  const { setTheme } = useTheme();
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") {
+      return "system";
+    }
+
+    return (window.localStorage.getItem("theme") as Theme | null) ?? "system";
+  });
+
+  useEffect(() => {
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    const useDark = theme === "dark" || (theme === "system" && prefersDark);
+
+    document.documentElement.classList.toggle("dark", useDark);
+    window.localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  function setTheme(value: Theme) {
+    setThemeState(value);
+  }
 
   return (
     <DropdownMenu modal={false}>
@@ -62,9 +83,6 @@ export function ThemeSwitcher() {
   );
 }
 
-export function ThemeProvider({
-  children,
-  ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

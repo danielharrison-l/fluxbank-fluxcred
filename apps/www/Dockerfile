@@ -28,13 +28,12 @@ FROM node:24-alpine AS prod
 
 WORKDIR /loci
 
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl nginx
 
-COPY --from=builder /loci/apps/www/.next/standalone ./
-COPY --from=builder /loci/apps/www/public ./apps/www/public
-COPY --from=builder /loci/apps/www/.next/static ./apps/www/.next/static
+COPY --from=builder /loci/apps/www/dist /usr/share/nginx/html
+COPY apps/www/nginx.conf /etc/nginx/conf.d/default.conf
 
-CMD ["node", "apps/www/server.js"]
+CMD ["nginx", "-g", "daemon off;"]
 
 
 
